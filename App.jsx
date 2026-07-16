@@ -7,6 +7,21 @@ function App() {
   const [livreurs, setLivreurs] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showParcelForm, setShowParcelForm] = useState(false);
+  const [showLivreurForm, setShowLivreurForm] = useState(false);
+
+  // Formulaire Colis
+  const [parcelForm, setParcelForm] = useState({
+    de: '',
+    a: '',
+    prix: ''
+  });
+
+  // Formulaire Livreur
+  const [livreurForm, setLivreurForm] = useState({
+    nom: '',
+    phone: ''
+  });
 
   const API_URL = 'https://saas-livraison-cotonou.vercel.app';
 
@@ -42,6 +57,58 @@ function App() {
       console.error('Erreur:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Ajouter un colis
+  const handleAddParcel = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_URL}/parcels`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          de: parcelForm.de,
+          a: parcelForm.a,
+          prix: parseInt(parcelForm.prix),
+          status: 'En attente'
+        })
+      });
+
+      if (response.ok) {
+        setParcelForm({ de: '', a: '', prix: '' });
+        setShowParcelForm(false);
+        fetchData();
+        alert('✅ Colis ajouté avec succès !');
+      }
+    } catch (error) {
+      alert('❌ Erreur lors de l\'ajout du colis');
+      console.error(error);
+    }
+  };
+
+  // Ajouter un livreur
+  const handleAddLivreur = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_URL}/livreurs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nom: livreurForm.nom,
+          phone: livreurForm.phone
+        })
+      });
+
+      if (response.ok) {
+        setLivreurForm({ nom: '', phone: '' });
+        setShowLivreurForm(false);
+        fetchData();
+        alert('✅ Livreur ajouté avec succès !');
+      }
+    } catch (error) {
+      alert('❌ Erreur lors de l\'ajout du livreur');
+      console.error(error);
     }
   };
 
@@ -152,7 +219,50 @@ function App() {
             {/* Colis */}
             {activeTab === 'parcels' && (
               <div className="tab-content">
-                <h2>Gestion des Colis</h2>
+                <div className="section-header">
+                  <h2>Gestion des Colis</h2>
+                  <button className="btn-add" onClick={() => setShowParcelForm(!showParcelForm)}>
+                    {showParcelForm ? '✕ Fermer' : '+ Ajouter un colis'}
+                  </button>
+                </div>
+
+                {showParcelForm && (
+                  <form className="form-card" onSubmit={handleAddParcel}>
+                    <h3>Ajouter un nouveau colis</h3>
+                    <div className="form-group">
+                      <label>De (lieu de départ)</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Cotonou"
+                        value={parcelForm.de}
+                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>À (lieu d'arrivée)</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Porto-Novo"
+                        value={parcelForm.a}
+                        onChange={(e) => setParcelForm({...parcelForm, a: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Prix (XOF)</label>
+                      <input
+                        type="number"
+                        placeholder="Ex: 1500"
+                        value={parcelForm.prix}
+                        onChange={(e) => setParcelForm({...parcelForm, prix: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="btn-submit">Ajouter le colis</button>
+                  </form>
+                )}
+
                 {parcels.length > 0 ? (
                   <div className="table-container">
                     <table className="data-table">
@@ -183,6 +293,7 @@ function App() {
                 ) : (
                   <div className="empty-state">
                     <p>📦 Aucun colis pour le moment</p>
+                    <p className="hint">Cliquez "Ajouter un colis" pour commencer !</p>
                   </div>
                 )}
               </div>
@@ -191,7 +302,40 @@ function App() {
             {/* Livreurs */}
             {activeTab === 'livreurs' && (
               <div className="tab-content">
-                <h2>Gestion des Livreurs</h2>
+                <div className="section-header">
+                  <h2>Gestion des Livreurs</h2>
+                  <button className="btn-add" onClick={() => setShowLivreurForm(!showLivreurForm)}>
+                    {showLivreurForm ? '✕ Fermer' : '+ Ajouter un livreur'}
+                  </button>
+                </div>
+
+                {showLivreurForm && (
+                  <form className="form-card" onSubmit={handleAddLivreur}>
+                    <h3>Ajouter un nouveau livreur</h3>
+                    <div className="form-group">
+                      <label>Nom du livreur</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Jean Doe"
+                        value={livreurForm.nom}
+                        onChange={(e) => setLivreurForm({...livreurForm, nom: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Téléphone</label>
+                      <input
+                        type="tel"
+                        placeholder="Ex: +229 90123456"
+                        value={livreurForm.phone}
+                        onChange={(e) => setLivreurForm({...livreurForm, phone: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="btn-submit">Ajouter le livreur</button>
+                  </form>
+                )}
+
                 {livreurs.length > 0 ? (
                   <div className="cards-grid">
                     {livreurs.map(livreur => (
@@ -218,6 +362,7 @@ function App() {
                 ) : (
                   <div className="empty-state">
                     <p>👥 Aucun livreur enregistré</p>
+                    <p className="hint">Cliquez "Ajouter un livreur" pour commencer !</p>
                   </div>
                 )}
               </div>
