@@ -1,0 +1,411 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f7fa;
+  color: #333;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.logo-icon {
+  font-size: 40px;
+}
+
+.logo h1 {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-top: 5px;
+}
+
+/* Navigation */
+.nav {
+  background: white;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn {
+  padding: 12px 24px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  color: #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.nav-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.tab-content h2 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #667eea;
+}
+
+.stat-card h3 {
+  font-size: 14px;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-status {
+  font-size: 18px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Quick View */
+.quick-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.quick-section {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.quick-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #333;
+  font-weight: 600;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.item-id {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.item-status, .item-rating {
+  color: #666;
+  font-size: 13px;
+}
+
+.empty {
+  color: #999;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* Table */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.data-table th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.data-table td {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.data-table tr:hover {
+  background: #f9fafb;
+}
+
+.id {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.price {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.en_attente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.en_cours {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status.livre {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Cards Grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.livreur-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid #667eea;
+}
+
+.livreur-card h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.phone {
+  color: #667eea;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.livreur-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.livreur-stats > div {
+  text-align: center;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.livreur-stats strong {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.livreur-stats p {
+  font-size: 16px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* Empty State */
+.empty-state {
+  background: white;
+  padding: 60px 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state p {
+  font-size: 18px;
+  color: #999;
+}
+
+/* Footer */
+.footer {
+  background: #2c3e50;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+}
+
+.footer p {
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 30px 15px;
+  }
+
+  .logo h1 {
+    font-size: 24px;
+  }
+
+  .logo-icon {
+    font-size: 32px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .data-table {
+    font-size: 12px;
+  }
+
+  .data-table th, .data-table td {
+    padding: 10px;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .livreur-stats {
+    grid-template-columns: 1fr;
+  }
+}
