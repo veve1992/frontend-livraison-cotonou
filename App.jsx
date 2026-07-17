@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import TrackingPage from './TrackingPage';
+import LivreurDashboard from './LivreurDashboard';
+import './styles-premium.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -9,6 +12,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showParcelForm, setShowParcelForm] = useState(false);
   const [showLivreurForm, setShowLivreurForm] = useState(false);
+const [trackingId, setTrackingId] = useState('');
 
   // Formulaire Colis
   const [parcelForm, setParcelForm] = useState({
@@ -136,7 +140,19 @@ function App() {
         <button 
           className={`nav-btn ${activeTab === 'parcels' ? 'active' : ''}`}
           onClick={() => setActiveTab('parcels')}
-        >
+        ><button 
+  className={`nav-btn ${activeTab === 'tracking' ? 'active' : ''}`}
+  onClick={() => setActiveTab('tracking')}
+>
+  📍 Suivi
+</button>
+
+<button 
+  className={`nav-btn ${activeTab === 'livreur' ? 'active' : ''}`}
+  onClick={() => setActiveTab('livreur')}
+>
+  🚚 Livreur
+</button>
           📦 Colis
         </button>
         <button 
@@ -369,6 +385,26 @@ function App() {
             )}
           </>
         )}
+{/* Tracking Page */}
+{activeTab === 'tracking' && (
+  <div className="tab-content">
+    <div className="tracking-input">
+      <h2>📍 Suivi de colis</h2>
+      <input
+        type="text"
+        placeholder="Entrez le numéro de colis (ex: 1, 2, 3)"
+        value={trackingId}
+        onChange={(e) => setTrackingId(e.target.value)}
+      />
+    </div>
+    {trackingId && <TrackingPage parcelId={trackingId} />}
+  </div>
+)}
+
+{/* Livreur Dashboard */}
+{activeTab === 'livreur' && (
+  <LivreurDashboard />
+)}
       </main>
 
       {/* Footer */}
