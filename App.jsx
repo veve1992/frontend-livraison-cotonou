@@ -1,12 +1,13 @@
+import React, { useState, useEffect } from 'react';
 import SignatureComponent from './SignatureComponent';
 import ParcelDetailsModal from './ParcelDetailsModal';
-import React, { useState, useEffect } from 'react';
 import './App.css';
-import TrackingPage from './TrackingPage';
-import LivreurDashboard from './LivreurDashboard';
 import './styles-premium.css';
 
 function App() {
+  // ====================================
+  // STATES
+  // ====================================
   const [activeTab, setActiveTab] = useState('dashboard');
   const [parcels, setParcels] = useState([]);
   const [livreurs, setLivreurs] = useState([]);
@@ -18,11 +19,17 @@ function App() {
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedParcel, setSelectedParcel] = useState(null);
 
+  // API URL
+  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
+
   // Formulaire Colis
   const [parcelForm, setParcelForm] = useState({
     de: '',
     a: '',
-    prix: ''
+    prix: '',
+    numero_receptionnaire: '',
+    nom_receptionnaire: '',
+    adresse_livraison: ''
   });
 
   // Formulaire Livreur
@@ -31,33 +38,27 @@ function App() {
     phone: ''
   });
 
-  // NOTE: Changez cette URL si vous testez localement
-  // LOCAL: http://localhost:3000
-  // PRODUCTION: https://saas-livraison-cotonou.vercel.app
-  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou.onrender.com';
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+  // ====================================
+  // FETCH DATA
+  // ====================================
   const fetchData = async () => {
     try {
       setLoading(true);
-      
-      const [parcelsRes, livreursRes, statsRes] = await Promise.all([
+
+      const [parcelRes, livreurRes, statsRes] = await Promise.all([
         fetch(`${API_URL}/parcels`),
         fetch(`${API_URL}/livreurs`),
         fetch(`${API_URL}/stats`)
       ]);
 
-      if (parcelsRes.ok) {
-        const data = await parcelsRes.json();
-        setParcels(data);
+      if (parcelRes.ok) {
+        const data = await parcelRes.json();
+        setParcels(Array.isArray(data) ? data : data.parcels || []);
       }
 
-      if (livreursRes.ok) {
-        const data = await livreursRes.json();
-        setLivreurs(data);
+      if (livreurRes.ok) {
+        const data = await livreurRes.json();
+        setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
       }
 
       if (statsRes.ok) {
@@ -71,19 +72,25 @@ function App() {
     }
   };
 
-  // Ajouter un colis (ROUTE FIXÉE!)
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // ====================================
+  // ADD PARCEL
+  // ====================================
   const handleAddParcel = async (e) => {
     e.preventDefault();
-    try {
-      // Validation
-      if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
-        alert('❌ Veuillez remplir tous les champs');
-        return;
-      }
 
+    if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
+      alert('❌ Veuillez remplir tous les champs');
+      return;
+    }
+
+    try {
       const response = await fetch(`${API_URL}/parcels`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -91,18 +98,25 @@ function App() {
           de: parcelForm.de.trim(),
           a: parcelForm.a.trim(),
           prix: parseInt(parcelForm.prix),
+          numero_receptionnaire: parcelForm.numero_receptionnaire || '',
+          nom_receptionnaire: parcelForm.nom_receptionnaire || '',
+          adresse_livraison: parcelForm.adresse_livraison || '',
           status: 'En attente'
         })
       });
 
       if (response.ok) {
-        const result = await response.json();
-        setParcelForm({ de: '', a: '', prix: '' });
-        setShowParcelForm(false);
         setSuccessMessage('✅ Colis ajouté avec succès !');
+        setParcelForm({
+          de: '',
+          a: '',
+          prix: '',
+          numero_receptionnaire: '',
+          nom_receptionnaire: '',
+          adresse_livraison: ''
+        });
+        setShowParcelForm(false);
         fetchData();
-        
-        // Effacer le message après 3 secondes
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
         const error = await response.json();
@@ -114,19 +128,21 @@ function App() {
     }
   };
 
-  // Ajouter un livreur (ROUTE FIXÉE!)
+  // ====================================
+  // ADD LIVREUR
+  // ====================================
   const handleAddLivreur = async (e) => {
     e.preventDefault();
-    try {
-      // Validation
-      if (!livreurForm.nom || !livreurForm.phone) {
-        alert('❌ Veuillez remplir tous les champs');
-        return;
-      }
 
+    if (!livreurForm.nom || !livreurForm.phone) {
+      alert('❌ Veuillez remplir tous les champs');
+      return;
+    }
+
+    try {
       const response = await fetch(`${API_URL}/livreurs`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -137,13 +153,10 @@ function App() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        setSuccessMessage('✅ Livreur ajouté avec succès !');
         setLivreurForm({ nom: '', phone: '' });
         setShowLivreurForm(false);
-        setSuccessMessage('✅ Livreur ajouté avec succès !');
         fetchData();
-        
-        // Effacer le message après 3 secondes
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
         const error = await response.json();
@@ -155,6 +168,9 @@ function App() {
     }
   };
 
+  // ====================================
+  // RENDER
+  // ====================================
   return (
     <div className="app">
       {/* Header */}
@@ -170,31 +186,31 @@ function App() {
 
       {/* Navigation */}
       <nav className="nav">
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
           📊 Tableau de bord
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'parcels' ? 'active' : ''}`}
           onClick={() => setActiveTab('parcels')}
         >
           📦 Colis
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'livreurs' ? 'active' : ''}`}
           onClick={() => setActiveTab('livreurs')}
         >
           👥 Livreurs
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'tracking' ? 'active' : ''}`}
           onClick={() => setActiveTab('tracking')}
         >
           📍 Suivi
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'livreur' ? 'active' : ''}`}
           onClick={() => setActiveTab('livreur')}
         >
@@ -297,44 +313,6 @@ function App() {
                         placeholder="Ex: Cotonou"
                         value={parcelForm.de}
                         onChange={(e) => setParcelForm({...parcelForm, de: e.target.value})}
-                      />
-                    </div>
-
-                    {/* AUTRES CHAMPS DU FORMULAIRE XXXXXX */}
-
-                    <button type="button" onClick={handleAddParcel}>
-                      ➕ Ajouter le colis
-                    </button>
-                  </form>
-                )}
-
-                {parcels.length > 0 ? (
-  <div className="table-container">
-    <table className="data-table">
-      ...TABLEAU...
-    </table>
-  </div>
-) : (
-  <div className="empty-state">
-    <p>📦 Aucun colis pour le moment</p>
-  </div>
-)}
-
-{/* 👇 AJOUTER CECI 👇 */}
-{parcels.map(parcel => (
-  parcel.status === 'En route' && (
-    <div key={parcel.id} style={{marginTop: '30px'}}>
-      <h3>Signer la livraison du colis #{parcel.id}</h3>
-      <SignatureComponent 
-        colis_id={parcel.id}
-        onSuccess={() => {
-          setSuccessMessage('✅ Colis signé avec succès!');
-          fetchData();
-        }}
-      />
-    </div>
-  )
-))})}
                         required
                       />
                     </div>
@@ -358,6 +336,33 @@ function App() {
                         required
                       />
                     </div>
+                    <div className="form-group">
+                      <label>Numéro réceptionnaire</label>
+                      <input
+                        type="tel"
+                        placeholder="+22961234567"
+                        value={parcelForm.numero_receptionnaire}
+                        onChange={(e) => setParcelForm({...parcelForm, numero_receptionnaire: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Nom réceptionnaire</label>
+                      <input
+                        type="text"
+                        placeholder="Jean Doe"
+                        value={parcelForm.nom_receptionnaire}
+                        onChange={(e) => setParcelForm({...parcelForm, nom_receptionnaire: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Adresse de livraison</label>
+                      <input
+                        type="text"
+                        placeholder="123 Rue de la Paix"
+                        value={parcelForm.adresse_livraison}
+                        onChange={(e) => setParcelForm({...parcelForm, adresse_livraison: e.target.value})}
+                      />
+                    </div>
                     <button type="submit" className="btn-submit">Ajouter le colis</button>
                   </form>
                 )}
@@ -373,7 +378,7 @@ function App() {
                           <th>Prix</th>
                           <th>Statut</th>
                           <th>Livreur</th>
-                          s<th>Actions</th>  {/* ← AJOUTER */}
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -384,24 +389,24 @@ function App() {
                             <td>{parcel.a}</td>
                             <td className="price">{parcel.prix} XOF</td>
                             <td><span className={`status ${parcel.status.toLowerCase()}`}>{parcel.status}</span></td>
-                           <td>{parcel.livreur || '—'}</td>
-    <td>
-      <button 
-        onClick={() => setSelectedParcel(parcel)}
-        style={{
-          padding: '8px 12px',
-          backgroundColor: '#3498db',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          fontSize: '12px'
-        }}
-      >
-        📋 Détails
-      </button>
-    </td>
-  </tr>
+                            <td>{parcel.livreur || '—'}</td>
+                            <td>
+                              <button
+                                onClick={() => setSelectedParcel(parcel)}
+                                style={{
+                                  padding: '8px 12px',
+                                  backgroundColor: '#3498db',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '5px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px'
+                                }}
+                              >
+                                📋 Détails
+                              </button>
+                            </td>
+                          </tr>
                         ))}
                       </tbody>
                     </table>
@@ -484,7 +489,7 @@ function App() {
               </div>
             )}
 
-            {/* Tracking Page */}
+            {/* Tracking */}
             {activeTab === 'tracking' && (
               <div className="tab-content">
                 <div className="tracking-input">
@@ -495,19 +500,27 @@ function App() {
                     value={trackingId}
                     onChange={(e) => setTrackingId(e.target.value)}
                   />
+                  <button className="btn-add" onClick={() => {
+                    if (trackingId) {
+                      alert(`Suivi du colis #${trackingId} - Fonctionnalité en cours de développement`);
+                    }
+                  }}>
+                    🔍 Suivre
+                  </button>
                 </div>
-                {trackingId && <TrackingPage parcelId={trackingId} />}
               </div>
             )}
 
             {/* Livreur Dashboard */}
             {activeTab === 'livreur' && (
-              <LivreurDashboard />
+              <div className="tab-content">
+                <h2>🚚 Dashboard Livreur</h2>
+                <p>Fonctionnalité en développement...</p>
+              </div>
             )}
           </>
         )}
       </main>
-</main>
 
       {/* Modal Détails Colis */}
       {selectedParcel && (
@@ -522,15 +535,6 @@ function App() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="footer">
-        <p>© 2024 Livraison Cotonou - Plateforme de gestion des livraisons</p>
-      </footer>
-    </div>
-  );
-}
-
-export default App;
       {/* Footer */}
       <footer className="footer">
         <p>© 2024 Livraison Cotonou - Plateforme de gestion des livraisons</p>
