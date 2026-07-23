@@ -545,8 +545,7 @@ function App() {
   }
 }}>
   🔍 Suivre
-</button>                  </button>
-                </div>
+</button>                                  </div>
               </div>
             )}
 
