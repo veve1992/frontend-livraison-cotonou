@@ -296,7 +296,7 @@ function App() {
                         type="text"
                         placeholder="Ex: Cotonou"
                         value={parcelForm.de}
-                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value}{parcels.length > 0 ? (
+                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value}{parcels.length > 0 ? ()
   <div className="table-container">
     <table className="data-table">
       ...TABLEAU...
