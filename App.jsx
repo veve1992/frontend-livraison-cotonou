@@ -1,4 +1,5 @@
 import SignatureComponent from './SignatureComponent';
+import ParcelDetailsModal from './ParcelDetailsModal';
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import TrackingPage from './TrackingPage';
@@ -15,6 +16,7 @@ function App() {
   const [showLivreurForm, setShowLivreurForm] = useState(false);
   const [trackingId, setTrackingId] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedParcel, setSelectedParcel] = useState(null);
 
   // Formulaire Colis
   const [parcelForm, setParcelForm] = useState({
@@ -359,6 +361,7 @@ function App() {
                           <th>Prix</th>
                           <th>Statut</th>
                           <th>Livreur</th>
+                          s<th>Actions</th>  {/* ← AJOUTER */}
                         </tr>
                       </thead>
                       <tbody>
@@ -369,8 +372,24 @@ function App() {
                             <td>{parcel.a}</td>
                             <td className="price">{parcel.prix} XOF</td>
                             <td><span className={`status ${parcel.status.toLowerCase()}`}>{parcel.status}</span></td>
-                            <td>{parcel.livreur || '—'}</td>
-                          </tr>
+                           <td>{parcel.livreur || '—'}</td>
+    <td>
+      <button 
+        onClick={() => setSelectedParcel(parcel)}
+        style={{
+          padding: '8px 12px',
+          backgroundColor: '#3498db',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '12px'
+        }}
+      >
+        📋 Détails
+      </button>
+    </td>
+  </tr>
                         ))}
                       </tbody>
                     </table>
@@ -476,7 +495,30 @@ function App() {
           </>
         )}
       </main>
+</main>
 
+      {/* Modal Détails Colis */}
+      {selectedParcel && (
+        <ParcelDetailsModal
+          parcel={selectedParcel}
+          livreurs={livreurs}
+          onClose={() => setSelectedParcel(null)}
+          onRefresh={() => {
+            setSelectedParcel(null);
+            fetchData();
+          }}
+        />
+      )}
+
+      {/* Footer */}
+      <footer className="footer">
+        <p>© 2024 Livraison Cotonou - Plateforme de gestion des livraisons</p>
+      </footer>
+    </div>
+  );
+}
+
+export default App;
       {/* Footer */}
       <footer className="footer">
         <p>© 2024 Livraison Cotonou - Plateforme de gestion des livraisons</p>
