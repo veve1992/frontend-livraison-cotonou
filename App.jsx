@@ -1,3 +1,4 @@
+import SignatureComponent from './SignatureComponent';
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import TrackingPage from './TrackingPage';
@@ -293,7 +294,33 @@ function App() {
                         type="text"
                         placeholder="Ex: Cotonou"
                         value={parcelForm.de}
-                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value})}
+                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value}{parcels.length > 0 ? (
+  <div className="table-container">
+    <table className="data-table">
+      ...TABLEAU...
+    </table>
+  </div>
+) : (
+  <div className="empty-state">
+    <p>📦 Aucun colis pour le moment</p>
+  </div>
+)}
+
+{/* 👇 AJOUTER CECI 👇 */}
+{parcels.map(parcel => (
+  parcel.status === 'En route' && (
+    <div key={parcel.id} style={{marginTop: '30px'}}>
+      <h3>Signer la livraison du colis #{parcel.id}</h3>
+      <SignatureComponent 
+        colis_id={parcel.id}
+        onSuccess={() => {
+          setSuccessMessage('✅ Colis signé avec succès!');
+          fetchData();
+        }}
+      />
+    </div>
+  )
+))})}
                         required
                       />
                     </div>
