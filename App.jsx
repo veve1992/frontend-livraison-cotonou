@@ -296,7 +296,19 @@ function App() {
                         type="text"
                         placeholder="Ex: Cotonou"
                         value={parcelForm.de}
-                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value}{parcels.length > 0 ? ()
+                        onChange={(e) => setParcelForm({...parcelForm, de: e.target.value})}
+                      />
+                    </div>
+
+                    {/* AUTRES CHAMPS DU FORMULAIRE XXXXXX */}
+
+                    <button type="button" onClick={handleAddParcel}>
+                      ➕ Ajouter le colis
+                    </button>
+                  </form>
+                )}
+
+                {parcels.length > 0 ? (
   <div className="table-container">
     <table className="data-table">
       ...TABLEAU...
@@ -506,8 +518,7 @@ function App() {
           onRefresh={() => {
             setSelectedParcel(null);
             fetchData();
-          }
-         }}
+          }}
         />
       )}
 
