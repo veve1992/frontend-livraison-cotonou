@@ -523,13 +523,29 @@ function App() {
                     value={trackingId}
                     onChange={(e) => setTrackingId(e.target.value)}
                   />
-                  <button className="btn-add" onClick={() => {
-                    if (trackingId) {
-                      alert(`Suivi du colis #${trackingId} - Fonctionnalité en cours de développement`);
-                    }
-                  }}>
-                    🔍 Suivre
-                  </button>
+                  
+<button className="btn-add" onClick={async () => {
+  if (!trackingId) {
+    alert('⚠️ Veuillez entrer un numéro de colis');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/tracking/${trackingId}`);
+    const data = await response.json();
+
+    if (data.latitude && data.longitude) {
+      alert(`📍 SUIVI COLIS #${trackingId}\n📍 Position: ${data.latitude}, ${data.longitude}\n📍 Adresse: ${data.adresse || 'En cours'}\n📍 Statut: ${data.status || 'En route'}`);
+    } else {
+      alert('⚠️ Aucune position enregistrée pour ce colis');
+    }
+  } catch (error) {
+    console.error('Erreur:', error);
+    alert('❌ Erreur lors du suivi');
+  }
+}}>
+  🔍 Suivre
+</button>                  </button>
                 </div>
               </div>
             )}
