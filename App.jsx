@@ -24,13 +24,15 @@ function App() {
 
   // Formulaire Colis
   const [parcelForm, setParcelForm] = useState({
-    de: '',
-    a: '',
-    prix: '',
-    numero_receptionnaire: '',
-    nom_receptionnaire: '',
-    adresse_livraison: ''
-  });
+  de: '',
+  a: '',
+  prix: '',
+  numero_receptionnaire: '',
+  nom_receptionnaire: '',
+  prenom_receptionnaire: '',
+  contact_receptionnaire: '',
+  adresse_livraison: ''
+});
 
   // Formulaire Livreur
   const [livreurForm, setLivreurForm] = useState({
@@ -354,6 +356,27 @@ function App() {
                         onChange={(e) => setParcelForm({...parcelForm, nom_receptionnaire: e.target.value})}
                       />
                     </div>
+<div className="form-group">
+  <label>Prénom du client</label>
+  <input
+    type="text"
+    placeholder="Jean"
+    value={parcelForm.prenom_receptionnaire}
+    onChange={(e) => setParcelForm({...parcelForm, prenom_receptionnaire: e.target.value})}
+    required
+  />
+</div>
+
+<div className="form-group">
+  <label>Contact du client</label>
+  <input
+    type="tel"
+    placeholder="+22961234567"
+    value={parcelForm.contact_receptionnaire}
+    onChange={(e) => setParcelForm({...parcelForm, contact_receptionnaire: e.target.value})}
+    required
+  />
+</div>
                     <div className="form-group">
                       <label>Adresse de livraison</label>
                       <input
