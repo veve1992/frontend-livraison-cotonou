@@ -506,7 +506,8 @@ function App() {
           onRefresh={() => {
             setSelectedParcel(null);
             fetchData();
-          }}
+          }
+         }}
         />
       )}
 
