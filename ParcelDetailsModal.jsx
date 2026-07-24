@@ -156,12 +156,11 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              colis_id: parcel.id,
-              livreur_id: selectedLivreur || 1,
-              latitude: parseFloat(latitude),
-              longitude: parseFloat(longitude),
-              adresse: adresse
-            })
+  colis_id: parcel.id,
+  latitude: parseFloat(latitude),
+  longitude: parseFloat(longitude),
+  adresse: adresse
+})
           });
 
           if (response.ok) {
