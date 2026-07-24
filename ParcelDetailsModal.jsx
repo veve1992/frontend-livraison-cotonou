@@ -66,6 +66,11 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
             <p><strong>Statut:</strong> <span style={styles.badge}>{parcel.status}</span></p>
             <p><strong>Livreur:</strong> {parcel.livreur || 'Non assigné'}</p>
           </div>
+<p><strong>Nom client:</strong> {parcel.nom_receptionnaire || 'N/A'}</p>
+<p><strong>Prénom:</strong> {parcel.prenom_receptionnaire || 'N/A'}</p>
+<p><strong>Contact:</strong> {parcel.contact_receptionnaire || 'N/A'}</p>
+<p><strong>Adresse livraison:</strong> {parcel.adresse_livraison || 'N/A'}</p>
+<p><strong>Description:</strong> {parcel.description_colis || 'N/A'}</p>
         </div>
 
         {/* ASSIGNER LIVREUR */}
