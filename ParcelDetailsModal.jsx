@@ -100,7 +100,85 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
             </button>
           </div>
         )}
+{/* ENREGISTRER POSITION GPS */}
+{parcel.status === 'En route' && (
+  <div style={styles.section}>
+    <h3>📍 Enregistrer Position GPS (Test)</h3>
+    <div style={styles.info}>
+      <p><strong>Colis:</strong> #{parcel.id}</p>
+      <p><strong>Statut:</strong> {parcel.status}</p>
+    </div>
+    <div style={{marginBottom: '15px'}}>
+      <label style={{display: 'block', marginBottom: '8px'}}>Latitude</label>
+      <input
+        type="number"
+        step="0.0001"
+        placeholder="6.5"
+        defaultValue="6.4969"
+        id="latitude"
+        style={styles.input}
+      />
+    </div>
+    <div style={{marginBottom: '15px'}}>
+      <label style={{display: 'block', marginBottom: '8px'}}>Longitude</label>
+      <input
+        type="number"
+        step="0.0001"
+        placeholder="2.6289"
+        defaultValue="2.6289"
+        id="longitude"
+        style={styles.input}
+      />
+    </div>
+    <div style={{marginBottom: '15px'}}>
+      <label style={{display: 'block', marginBottom: '8px'}}>Adresse</label>
+      <input
+        type="text"
+        placeholder="Ex: Rue de la Paix, Cotonou"
+        defaultValue="Cotonou, Bénin"
+        id="adresse"
+        style={styles.input}
+      />
+    </div>
+    <button
+      onClick={async () => {
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const adresse = document.getElementById('adresse').value;
 
+        if (!latitude || !longitude) {
+          alert('⚠️ Veuillez entrer latitude et longitude');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/tracking`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              colis_id: parcel.id,
+              livreur_id: selectedLivreur || 1,
+              latitude: parseFloat(latitude),
+              longitude: parseFloat(longitude),
+              adresse: adresse
+            })
+          });
+
+          if (response.ok) {
+            alert('✅ Position GPS enregistrée!\n📍 ' + latitude + ', ' + longitude);
+          } else {
+            alert('❌ Erreur lors de l\'enregistrement');
+          }
+        } catch (err) {
+          alert('❌ Erreur: ' + err.message);
+        }
+      }}
+      style={{...styles.button, ...styles.primaryButton}}
+    >
+      📍 Enregistrer Position GPS
+    </button>
+  </div>
+)}
         {/* SIGNER LIVRAISON */}
         {parcel.status === 'En route' && (
           <div style={styles.section}>
