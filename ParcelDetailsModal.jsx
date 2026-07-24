@@ -155,8 +155,9 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
           const response = await fetch(`${API_URL}/tracking`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+           body: JSON.stringify({
   colis_id: parcel.id,
+  livreur_id: parcel.livreur || selectedLivreur || 1,
   latitude: parseFloat(latitude),
   longitude: parseFloat(longitude),
   adresse: adresse
