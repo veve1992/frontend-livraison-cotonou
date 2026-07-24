@@ -97,15 +97,18 @@ function App() {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          de: parcelForm.de.trim(),
-          a: parcelForm.a.trim(),
-          prix: parseInt(parcelForm.prix),
-          numero_receptionnaire: parcelForm.numero_receptionnaire || '',
-          nom_receptionnaire: parcelForm.nom_receptionnaire || '',
-          adresse_livraison: parcelForm.adresse_livraison || '',
-          status: 'En attente'
-        })
+       body: JSON.stringify({
+  de: parcelForm.de.trim(),
+  a: parcelForm.a.trim(),
+  prix: parseInt(parcelForm.prix),
+  nom_receptionnaire: parcelForm.nom_receptionnaire || '',
+  prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
+  contact_receptionnaire: parcelForm.contact_receptionnaire || '',
+  adresse_livraison: parcelForm.adresse_livraison || '',
+  description_colis: parcelForm.description_colis || '',
+  photo_colis: parcelForm.photo_colis || '',
+  status: 'En attente'
+})
       });
 
       if (response.ok) {
