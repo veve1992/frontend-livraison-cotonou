@@ -576,7 +576,7 @@ function App() {
     <div className="stats-grid">
       <div className="stat-card">
         <h3>Colis à Livrer</h3>
-        <p className="stat-number">{parcels.filter(p => p.status === 'En route').length}</p>
+        <p className="stat-number">{parcels.filter(p => p.status === 'Pris' || p.status === 'En route').length}</p>
       </div>
       <div className="stat-card">
         <h3>Colis Livrés</h3>
@@ -592,7 +592,7 @@ function App() {
       <h3>Colis à Livrer</h3>
     </div>
 
-    {parcels.filter(p => p.status === 'En route').length > 0 ? (
+    {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').length > 0 ? (
       <div className="table-container">
         <table className="data-table">
           <thead>
@@ -607,7 +607,7 @@ function App() {
             </tr>
           </thead>
           <tbody>
-  {parcels.filter(p => p.status === 'En route').map(parcel => (
+  {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').map(parcel => (
     <tr key={parcel.id}>
       <td className="id">#{parcel.id}</td>
       <td>{parcel.de}</td>
