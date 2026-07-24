@@ -340,15 +340,6 @@ function App() {
                       />
                     </div>
                     <div className="form-group">
-                      <label>Numéro réceptionnaire</label>
-                      <input
-                        type="tel"
-                        placeholder="+22961234567"
-                        value={parcelForm.numero_receptionnaire}
-                        onChange={(e) => setParcelForm({...parcelForm, numero_receptionnaire: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
                       <label>Nom réceptionnaire</label>
                       <input
                         type="text"
