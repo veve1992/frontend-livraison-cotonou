@@ -31,9 +31,10 @@ function App() {
   nom_receptionnaire: '',
   prenom_receptionnaire: '',
   contact_receptionnaire: '',
-  adresse_livraison: ''
+  adresse_livraison: '',
+  description_colis: '',
+  photo_colis: ''
 });
-
   // Formulaire Livreur
   const [livreurForm, setLivreurForm] = useState({
     nom: '',
@@ -386,6 +387,33 @@ function App() {
                         onChange={(e) => setParcelForm({...parcelForm, adresse_livraison: e.target.value})}
                       />
                     </div>
+<div className="form-group">
+  <label>Description du colis</label>
+  <textarea
+    placeholder="Ex: Électronique fragile, livrer avec soin..."
+    value={parcelForm.description_colis}
+    onChange={(e) => setParcelForm({...parcelForm, description_colis: e.target.value})}
+    rows="4"
+  />
+</div>
+
+<div className="form-group">
+  <label>Photo du colis</label>
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setParcelForm({...parcelForm, photo_colis: event.target.result});
+        };
+        reader.readAsDataURL(file);
+      }
+    }}
+  />
+</div>
                     <button type="submit" className="btn-submit">Ajouter le colis</button>
                   </form>
                 )}
