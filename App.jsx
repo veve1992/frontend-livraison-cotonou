@@ -549,13 +549,66 @@ function App() {
               </div>
             )}
 
-            {/* Livreur Dashboard */}
-            {activeTab === 'livreur' && (
-              <div className="tab-content">
-                <h2>🚚 Dashboard Livreur</h2>
-                <p>Fonctionnalité en développement...</p>
-              </div>
-            )}
+           {/* Livreur Dashboard */}
+{activeTab === 'livreur' && (
+  <div className="tab-content">
+    <h2>🚚 Mon Dashboard Livreur</h2>
+    
+    <div className="stats-grid">
+      <div className="stat-card">
+        <h3>Colis à Livrer</h3>
+        <p className="stat-number">{parcels.filter(p => p.status === 'En route').length}</p>
+      </div>
+      <div className="stat-card">
+        <h3>Colis Livrés</h3>
+        <p className="stat-number">{parcels.filter(p => p.status === 'Livré').length}</p>
+      </div>
+      <div className="stat-card">
+        <h3>Revenus</h3>
+        <p className="stat-number">{parcels.filter(p => p.status === 'Livré').reduce((sum, p) => sum + (p.prix * 0.2), 0).toFixed(0)} XOF</p>
+      </div>
+    </div>
+
+    <div className="section-header">
+      <h3>Colis à Livrer</h3>
+    </div>
+
+    {parcels.filter(p => p.status === 'En route').length > 0 ? (
+      <div className="table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>De</th>
+              <th>À</th>
+              <th>Client</th>
+              <th>Contact</th>
+              <th>Adresse</th>
+              <th>Prix</th>
+            </tr>
+          </thead>
+          <tbody>
+            {parcels.filter(p => p.status === 'En route').map(parcel => (
+              <tr key={parcel.id}>
+                <td className="id">#{parcel.id}</td>
+                <td>{parcel.de}</td>
+                <td>{parcel.a}</td>
+                <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
+                <td>{parcel.contact_receptionnaire || 'N/A'}</td>
+                <td>{parcel.adresse_livraison || 'N/A'}</td>
+                <td className="price">{parcel.prix} XOF</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div className="empty-state">
+        <p>🎉 Aucun colis à livrer!</p>
+      </div>
+    )}
+  </div>
+)} 
           </>
         )}
       </main>
