@@ -588,19 +588,18 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {parcels.filter(p => p.status === 'En route').map(parcel => (
-              <tr key={parcel.id}>
-                <td className="id">#{parcel.id}</td>
-                <td>{parcel.de}</td>
-                <td>{parcel.a}</td>
-                <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
-                <td>{parcel.contact_receptionnaire || 'N/A'}</td>
-                <td>{parcel.adresse_livraison || 'N/A'}</td>
-                <td className="price">{parcel.prix} XOF</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  {parcels.filter(p => p.status === 'En route').map(parcel => (
+    <tr key={parcel.id}>
+      <td className="id">#{parcel.id}</td>
+      <td>{parcel.de}</td>
+      <td>{parcel.a}</td>
+      <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
+      <td>{parcel.contact_receptionnaire || 'N/A'}</td>
+      <td>{parcel.adresse_livraison || 'N/A'}</td>
+      <td className="price">{parcel.prix} XOF</td>
+    </tr>
+  ))}
+</tbody>        </table>
       </div>
     ) : (
       <div className="empty-state">
