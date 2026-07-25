@@ -8,6 +8,8 @@ export default function SignatureComponent({ colis_id, onSuccess }) {
   const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
   const startDrawing = (e) => {
+  console.log('🖱️ SOURIS ENFONCÉE !', e);
+  setIsDrawing(true);
     setIsDrawing(true);
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
