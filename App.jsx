@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import SignatureComponent from './SignatureComponent';
 import ParcelDetailsModal from './ParcelDetailsModal';
+import TrackingPublic from './TrackingPublic';
 import './App.css';
 import './styles-premium.css';
 
 function App() {
+// Récupérer l'ID du colis depuis l'URL pour suivi public
+  const urlParams = new URLSearchParams(window.location.search);
+  const tracking_id = urlParams.get('tracking');
+
+  // Page de suivi PUBLIQUE
+  if (tracking_id) {
+    return <TrackingPublic colis_id={tracking_id} />;
+  }
   // ====================================
   // STATES
   // ====================================
