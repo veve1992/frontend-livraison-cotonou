@@ -41,37 +41,50 @@ export default function SignatureComponent({ colis_id, onSuccess }) {
   };
 
   const handleSubmit = async () => {
-    if (!nomClient.trim()) {
-      alert('⚠️ Veuillez entrer votre nom');
-      return;
+  if (!nomClient.trim()) {
+    alert('⚠️ Veuillez entrer votre nom');
+    return;
+  }
+
+  const signatureImage = canvasRef.current.toDataURL('image/png');
+  
+  console.log('📋 DONNÉES ENVOYÉES:', {
+    nom: nomClient.trim(),
+    signature: signatureImage.substring(0, 100) + '...',
+    statut: 'Livré'
+  });
+
+  if (!signatureImage || signatureImage === 'data:image/png;base64,') {
+    alert('⚠️ Veuillez signer dans le cadre');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/parcels/${colis_id}/sign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom: nomClient.trim(),
+        signature: signatureImage,
+        statut: 'Livré'
+      })
+    });
+
+    const data = await response.json();
+    
+    console.log('📥 RÉPONSE BACKEND:', data);
+
+    if (response.ok) {
+      alert('✅ Colis livré et signé !');
+      if (onSuccess) onSuccess();
+    } else {
+      alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
     }
-
-    const signatureImage = canvasRef.current.toDataURL('image/png');
-
-    try {
-      const response = await fetch(`${API_URL}/parcels/${colis_id}/sign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nom: nomClient.trim(),
-          signature: signatureImage,
-          statut: 'Livré'
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('✅ Colis livré et signé !');
-        if (onSuccess) onSuccess();
-      } else {
-        alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
-      }
-    } catch (error) {
-      alert('❌ Erreur: ' + error.message);
-    }
-  };
-
+  } catch (error) {
+    console.error('❌ Erreur fetch:', error);
+    alert('❌ Erreur: ' + error.message);
+  }
+};
   return (
     <div style={styles.container}>
       <h3>✍️ Signature du Client</h3>
