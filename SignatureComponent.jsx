@@ -43,14 +43,16 @@ function SignaturePad({ onSignatureCapture, parcelId }) {
 
     try {
       // Envoyer la signature au backend
-      const response = await fetch('https://saas-livraison-cotonou.vercel.app/parcels/' + parcelId, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'Livré',
-          signature: signatureImage
-        })
-      });
+     const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
+
+const response = await fetch(`${API_URL}/parcels/${colis_id}/sign`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    statut: 'Livré',
+    signature: signatureImage
+  })
+});
 
       if (response.ok) {
         onSignatureCapture(signatureImage);
