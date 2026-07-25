@@ -1,29 +1,23 @@
 import React, { useRef, useState } from 'react';
 
-function SignaturePad({ onSignatureCapture, parcelId }) {
+export default function SignatureComponent({ colis_id, onSuccess }) {
   const canvasRef = useRef(null);
+  const [nomClient, setNomClient] = useState('');
   const [isDrawing, setIsDrawing] = useState(false);
-  const [signatureData, setSignatureData] = useState(null);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
   const startDrawing = (e) => {
     setIsDrawing(true);
-    const rect = canvasRef.current.getBoundingClientRect();
     const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.moveTo(e.clientX - canvasRef.current.offsetLeft, e.clientY - canvasRef.current.offsetTop);
   };
 
   const draw = (e) => {
     if (!isDrawing) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
     const ctx = canvasRef.current.getContext('2d');
-    
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#333';
-    
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.lineTo(e.clientX - canvasRef.current.offsetLeft, e.clientY - canvasRef.current.offsetTop);
     ctx.stroke();
   };
 
@@ -31,72 +25,119 @@ function SignaturePad({ onSignatureCapture, parcelId }) {
     setIsDrawing(false);
   };
 
-  const clearSignature = () => {
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    setSignatureData(null);
-  };
+  const handleSubmit = async () => {
+    if (!nomClient.trim()) {
+      alert('⚠️ Veuillez entrer votre nom');
+      return;
+    }
 
-  const saveSignature = async () => {
-    const signatureImage = canvasRef.current.toDataURL();
-    setSignatureData(signatureImage);
+    const signatureImage = canvasRef.current.toDataURL('image/png');
 
     try {
-      // Envoyer la signature au backend
-     const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
-
-const response = await fetch(`${API_URL}/parcels/${colis_id}/sign`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    statut: 'Livré',
-    signature: signatureImage
-  })
-});
+      const response = await fetch(`${API_URL}/parcels/${colis_id}/sign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nom: nomClient,
+          signature: signatureImage,
+          statut: 'Livré'
+        })
+      });
 
       if (response.ok) {
-        onSignatureCapture(signatureImage);
-        alert('✅ Signature enregistrée ! Livraison confirmée !');
+        alert('✅ Colis livré et signé !');
+        if (onSuccess) onSuccess();
+      } else {
+        alert('❌ Erreur lors de l\'enregistrement');
       }
     } catch (error) {
-      alert('❌ Erreur lors de l\'enregistrement');
-      console.error(error);
+      alert('❌ Erreur: ' + error.message);
     }
   };
 
+  const clearCanvas = () => {
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+  };
+
   return (
-    <div className="signature-pad">
-      <h3>✍️ Signature du client</h3>
-      <p className="hint">Veuillez signer ci-dessous pour confirmer la livraison</p>
+    <div style={styles.container}>
+      <h3>✍️ Signature du Client</h3>
       
+      <div style={styles.form}>
+        <label>Nom du client:</label>
+        <input
+          type="text"
+          placeholder="Entrez votre nom"
+          value={nomClient}
+          onChange={(e) => setNomClient(e.target.value)}
+          style={styles.input}
+        />
+      </div>
+
       <canvas
         ref={canvasRef}
         width={400}
         height={200}
-        className="signature-canvas"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
+        style={styles.canvas}
       />
 
-      <div className="signature-buttons">
-        <button className="btn-clear" onClick={clearSignature}>
-          🗑️ Effacer
+      <div style={styles.buttonGroup}>
+        <button onClick={clearCanvas} style={{...styles.button, backgroundColor: '#ffc107'}}>
+          🔄 Effacer
         </button>
-        <button className="btn-save" onClick={saveSignature}>
-          ✅ Confirmer signature
+        <button onClick={handleSubmit} style={{...styles.button, backgroundColor: '#28a745'}}>
+          ✅ Confirmer la réception
         </button>
       </div>
-
-      {signatureData && (
-        <div className="signature-preview">
-          <p>✅ Signature enregistrée</p>
-          <img src={signatureData} alt="Signature" />
-        </div>
-      )}
     </div>
   );
 }
 
-export default SignaturePad;
+const styles = {
+  container: {
+    padding: '20px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    marginTop: '20px'
+  },
+  form: {
+    marginBottom: '20px'
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    fontSize: '16px',
+    border: '1px solid #ddd',
+    borderRadius: '5px',
+    marginTop: '8px',
+    boxSizing: 'border-box'
+  },
+  canvas: {
+    border: '2px solid #333',
+    borderRadius: '5px',
+    backgroundColor: 'white',
+    cursor: 'crosshair',
+    display: 'block',
+    width: '100%',
+    marginBottom: '15px'
+  },
+  buttonGroup: {
+    display: 'flex',
+    gap: '10px'
+  },
+  button: {
+    flex: 1,
+    padding: '10px',
+    fontSize: '16px',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  }
+};
