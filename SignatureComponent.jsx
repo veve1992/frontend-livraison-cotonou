@@ -9,20 +9,33 @@ export default function SignatureComponent({ colis_id, onSuccess }) {
 
   const startDrawing = (e) => {
     setIsDrawing(true);
-    const ctx = canvasRef.current.getContext('2d');
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#000';
     ctx.beginPath();
-    ctx.moveTo(e.clientX - canvasRef.current.offsetLeft, e.clientY - canvasRef.current.offsetTop);
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
 
   const draw = (e) => {
     if (!isDrawing) return;
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.lineTo(e.clientX - canvasRef.current.offsetLeft, e.clientY - canvasRef.current.offsetTop);
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
   };
 
   const stopDrawing = () => {
     setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   };
 
   const handleSubmit = async () => {
@@ -38,26 +51,23 @@ export default function SignatureComponent({ colis_id, onSuccess }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nom: nomClient,
+          nom: nomClient.trim(),
           signature: signatureImage,
           statut: 'Livré'
         })
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         alert('✅ Colis livré et signé !');
         if (onSuccess) onSuccess();
       } else {
-        alert('❌ Erreur lors de l\'enregistrement');
+        alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
       }
     } catch (error) {
       alert('❌ Erreur: ' + error.message);
     }
-  };
-
-  const clearCanvas = () => {
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   };
 
   return (
