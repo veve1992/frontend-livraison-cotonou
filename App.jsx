@@ -468,7 +468,7 @@ const [totalPages, setTotalPages] = useState(1);
           disabled={currentPage === 1}
           style={{padding: '10px 20px', marginRight: '10px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1}}
         >
-          ← Précédent
+           Précédent
         </button>
         <span style={{margin: '0 20px', fontSize: '16px', fontWeight: 'bold'}}>
           Page {currentPage} / {totalPages}
@@ -478,7 +478,7 @@ const [totalPages, setTotalPages] = useState(1);
           disabled={currentPage === totalPages}
           style={{padding: '10px 20px', marginLeft: '10px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1}}
         >
-          Suivant →
+          Suivant 
         </button>
       </div>
     )}
