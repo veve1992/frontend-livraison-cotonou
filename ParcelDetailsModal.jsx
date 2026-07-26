@@ -184,29 +184,41 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
     </button>
   </div>
 )}
-        {/* SIGNER LIVRAISON */}
-        {parcel.status === 'En route' && (
-          <div style={styles.section}>
-            {!showSignature ? (
-              <button
-                onClick={() => setShowSignature(true)}
-                style={{...styles.button, ...styles.successButton}}
-              >
-                ✍️ Signer la livraison
-              </button>
-            ) : (
-              <SignatureComponent
-                colis_id={parcel.id}
-                onSuccess={() => {
-                  alert('✅ Colis livré et signé!');
+      {/* SIGNER LIVRAISON */}
+{parcel.status === 'En route' && (
+  <div style={styles.section}>
+    {!showSignature ? (
+      <button
+        onClick={() => setShowSignature(true)}
+        style={{...styles.button, ...styles.successButton}}
+      >
+        ✍️ Confirmer la réception
+      </button>
+    ) : (
+      <div style={styles.section}>
+        <label style={{fontSize: '16px', fontWeight: 'bold'}}>
+          <input 
+            type="checkbox" 
+            onChange={(e) => {
+              if (e.target.checked) {
+                fetch(`${API_URL}/parcels/${parcel.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ status: 'Livré' })
+                }).then(() => {
+                  alert('✅ Colis confirmé comme livré !');
                   onRefresh();
                   onClose();
-                }}
-              />
-            )}
-          </div>
-        )}
-
+                }).catch(err => alert('❌ Erreur: ' + err.message));
+              }
+            }}
+          />
+          {' '}Je confirme la réception du colis
+        </label>
+      </div>
+    )}
+  </div>
+)}
         {/* STATUT LIVRÉ */}
         {parcel.status === 'Livré' && (
           <div style={styles.successBox}>
