@@ -21,7 +21,34 @@ export default function SignatureComponent({ colis_id, onSuccess }) {
     ctx.beginPath();
     ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
+const handleTouchStart = (e) => {
+  const touch = e.touches[0];
+  const canvas = canvasRef.current;
+  const rect = canvas.getBoundingClientRect();
+  setIsDrawing(true);
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#000';
+  ctx.beginPath();
+  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+};
 
+const handleTouchMove = (e) => {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const canvas = canvasRef.current;
+  const rect = canvas.getBoundingClientRect();
+  const ctx = canvas.getContext('2d');
+  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  ctx.stroke();
+};
+
+const handleTouchEnd = () => {
+  setIsDrawing(false);
+};
   const draw = (e) => {
     if (!isDrawing) return;
     const canvas = canvasRef.current;
@@ -101,16 +128,18 @@ export default function SignatureComponent({ colis_id, onSuccess }) {
       </div>
 
       <canvas
-        ref={canvasRef}
-        width={400}
-        height={200}
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
-        style={styles.canvas}
-      />
-
+  ref={canvasRef}
+  width={400}
+  height={200}
+  onMouseDown={startDrawing}
+  onMouseMove={draw}
+  onMouseUp={stopDrawing}
+  onMouseLeave={stopDrawing}
+  onTouchStart={handleTouchStart}
+  onTouchMove={handleTouchMove}
+  onTouchEnd={handleTouchEnd}
+  style={styles.canvas}
+/>
       <div style={styles.buttonGroup}>
         <button onClick={clearCanvas} style={{...styles.button, backgroundColor: '#ffc107'}}>
           🔄 Effacer
