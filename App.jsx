@@ -458,9 +458,29 @@ const [totalPages, setTotalPages] = useState(1);
                           </tr>
                         ))}
                       </tbody>
-                    </table>
-    
-                     </div>
+              </table>
+                    {totalPages > 1 && (
+                      <div style={{marginTop: '20px', textAlign: 'center', padding: '15px'}}>
+                        <button 
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          style={{padding: '10px 20px', marginRight: '10px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                        >
+                          Previous
+                        </button>
+                        <span style={{margin: '0 20px', fontSize: '16px', fontWeight: 'bold'}}>
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button 
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          style={{padding: '10px 20px', marginLeft: '10px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
+                  </div>     
                 ) : (
                   <div className="empty-state">
                     <p>📦 Aucun colis pour le moment</p>
