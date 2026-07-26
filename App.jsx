@@ -57,11 +57,10 @@ function App() {
     try {
       setLoading(true);
 
-      const [parcelRes, livreurRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/parcels`),
-        fetch(`${API_URL}/livreurs`),
-        fetch(`${API_URL}/stats`)
-      ]);
+      const [parcelRes, livreurRes] = await Promise.all([
+  fetch(`${API_URL}/parcels`),
+  fetch(`${API_URL}/livreurs`)
+]);
 
       if (parcelRes.ok) {
         const data = await parcelRes.json();
@@ -73,10 +72,6 @@ function App() {
         setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
       }
 
-      if (statsRes.ok) {
-        const data = await statsRes.json();
-        setStats(data);
-      }
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
