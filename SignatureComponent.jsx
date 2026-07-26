@@ -74,9 +74,12 @@ const handleTouchEnd = () => {
   }
 
   const signatureImage = canvasRef.current.toDataURL('image/png');
-  
-  alert('📋 NOM: ' + nomClient.trim());
-alert('📋 SIGNATURE: ' + (signatureImage ? 'OK' : 'VIDE'));
+  console.log('📋 DONNÉES ENVOYÉES:', {
+  nom: nomClient.trim(),
+  signature: signatureImage.substring(0, 100) + '...',
+  statut: 'Livré'
+});
+ alert('✅ NOM: ' + nomClient.trim() + '\n✅ SIGNATURE: ' + (signatureImage ? 'OK' : 'VIDE'));
 
   if (!signatureImage || signatureImage === 'data:image/png;base64,') {
     alert('⚠️ Veuillez signer dans le cadre');
@@ -95,9 +98,9 @@ alert('📋 SIGNATURE: ' + (signatureImage ? 'OK' : 'VIDE'));
     });
 
     const data = await response.json();
-    
-   alert('📥 RÉPONSE: ' + JSON.stringify(data));
-    if (response.ok) {
+    console.log('📥 RÉPONSE BACKEND:', data);
+  alert('Réponse: ' + (data.success ? 'Succès !' : 'Erreur: ' + data.error));   
+ if (response.ok) {
       alert('✅ Colis livré et signé !');
       if (onSuccess) onSuccess();
     } else {
