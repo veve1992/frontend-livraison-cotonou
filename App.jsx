@@ -20,6 +20,8 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [parcels, setParcels] = useState([]);
   const [livreurs, setLivreurs] = useState([]);
+const [currentPage, setCurrentPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showParcelForm, setShowParcelForm] = useState(false);
@@ -58,15 +60,14 @@ function App() {
       setLoading(true);
 
       const [parcelRes, livreurRes] = await Promise.all([
-  fetch(`${API_URL}/parcels`),
+  fetch(`${API_URL}/parcels?page=${currentPage}`),
   fetch(`${API_URL}/livreurs`)
 ]);
-
-      if (parcelRes.ok) {
-        const data = await parcelRes.json();
-        setParcels(Array.isArray(data) ? data : data.parcels || []);
-      }
-
+     if (parcelRes.ok) {
+  const data = await parcelRes.json();
+  setParcels(data.data || []);
+  setTotalPages(data.pages || 1);
+}
       if (livreurRes.ok) {
         const data = await livreurRes.json();
         setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
@@ -79,10 +80,9 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+ useEffect(() => {
+  fetchData();
+}, [currentPage]);
   // ====================================
   // ADD PARCEL
   // ====================================
@@ -459,6 +459,31 @@ function App() {
                         ))}
                       </tbody>
                     </table>
+</table>
+    
+    {/* PAGINATION */}
+    {totalPages > 1 && (
+      <div style={{marginTop: '20px', textAlign: 'center', padding: '15px'}}>
+        <button 
+          onClick={() => setCurrentPage(currentPage - 1)}
+          disabled={currentPage === 1}
+          style={{padding: '10px 20px', marginRight: '10px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1}}
+        >
+          ← Précédent
+        </button>
+        <span style={{margin: '0 20px', fontSize: '16px', fontWeight: 'bold'}}>
+          Page {currentPage} / {totalPages}
+        </span>
+        <button 
+          onClick={() => setCurrentPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          style={{padding: '10px 20px', marginLeft: '10px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1}}
+        >
+          Suivant →
+        </button>
+      </div>
+    )}
+  </div>
                   </div>
                 ) : (
                   <div className="empty-state">
