@@ -459,7 +459,6 @@ const [totalPages, setTotalPages] = useState(1);
                         ))}
                       </tbody>
                     </table>
-</table>
     
     {/* PAGINATION */}
     {totalPages > 1 && (
