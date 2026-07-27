@@ -130,17 +130,7 @@ export default function TrackingPublic({ colis_id }) {
         </div>
       )}
 
-      {/* FOOTER */}
-      <div style={styles.footer}>
-        <p>Pour toute question, contactez le service client</p>
-        <button onClick={() => window.location.href = '/'} style={styles.button}>
-          ← Retour à la plateforme
-        </button>
-      </div>
-    </div>
-  );
-}
-
+     
 const styles = {
   container: {
     maxWidth: '800px',
