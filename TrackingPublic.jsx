@@ -58,11 +58,21 @@ export default function TrackingPublic({ colis_id }) {
     );
   }
 
-  return (
+ return (
     <div style={styles.container}>
       <div style={styles.header}>
         <h1>📍 Suivi de Votre Colis</h1>
         <p style={styles.colis_id}>Colis #{colis.id}</p>
+      </div>
+
+      {/* INFOS GÉNÉRALES */}
+      <div style={styles.card}>
+        <h2>📦 Détails du Colis</h2>
+        <p><strong>De:</strong> {colis.de}</p>
+        <p><strong>À:</strong> {colis.a}</p>
+        <p><strong>Statut:</strong> {colis.status}</p>
+        <p><strong>Livreur:</strong> {tracking?.livreur_nom || 'En cours'}</p>
+        <p><strong>Contact Livreur:</strong> {tracking?.livreur_phone || 'N/A'}</p>
       </div>
 
       {/* STATUS */}
@@ -84,7 +94,6 @@ export default function TrackingPublic({ colis_id }) {
           <p style={styles.small}>Dernière mise à jour: {new Date(tracking.created_at).toLocaleString('fr-FR')}</p>
         </div>
       )}
-
       {/* DÉTAILS CLIENT */}
       <div style={styles.card}>
         <h2>👤 Détails Client</h2>

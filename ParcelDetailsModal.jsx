@@ -65,6 +65,8 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
             <p><strong>Prix:</strong> {parcel.prix} XOF</p>
             <p><strong>Statut:</strong> <span style={styles.badge}>{parcel.status}</span></p>
             <p><strong>Livreur:</strong> {parcel.livreur || 'Non assigné'}</p>
+<p><strong>Téléphone Livreur:</strong> {parcel.livreur_phone || 'N/A'}</p>
+<p><strong>Livreur Nom:</strong> {parcel.livreur_nom || 'N/A'}</p>
           </div>
 <p><strong>Nom client:</strong> {parcel.nom_receptionnaire || 'N/A'}</p>
 <p><strong>Prénom:</strong> {parcel.prenom_receptionnaire || 'N/A'}</p>
