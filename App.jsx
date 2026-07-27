@@ -83,6 +83,15 @@ const [totalPages, setTotalPages] = useState(1);
  useEffect(() => {
   fetchData();
 }, [currentPage, API_URL]);
+const getNomLivreur = async (livreur_id) => {
+  try {
+    const res = await fetch(`${API_URL}/livreurs/${livreur_id}`);
+    const data = await res.json();
+    return data.nom || 'N/A';
+  } catch {
+    return 'N/A';
+  }
+};
   // ====================================
   // ADD PARCEL
   // ====================================
@@ -438,7 +447,7 @@ const [totalPages, setTotalPages] = useState(1);
                             <td>{parcel.a}</td>
                             <td className="price">{parcel.prix} XOF</td>
                             <td><span className={`status ${parcel.status.toLowerCase()}`}>{parcel.status}</span></td>
-                            <td>{parcel.livreur || '—'}</td>
+                            <td>{parcel.livreur ? `Livreur #${parcel.livreur}` : '—'}</td>
                             <td>
                               <button
                                 onClick={() => setSelectedParcel(parcel)}
