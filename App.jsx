@@ -82,7 +82,7 @@ const [totalPages, setTotalPages] = useState(1);
 
  useEffect(() => {
   fetchData();
-}, [currentPage]);
+}, [currentPage, API_URL]);
   // ====================================
   // ADD PARCEL
   // ====================================
