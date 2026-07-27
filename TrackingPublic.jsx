@@ -112,13 +112,12 @@ export default function TrackingPublic({ colis_id }) {
           <p><strong>Description:</strong> {colis.description_colis}</p>
         )}
       </div>
-
-      {/* LIVREUR */}
+{/* LIVREUR */}
       {colis.livreur && (
         <div style={styles.card}>
           <h2>🚚 Livreur Assigné</h2>
-          <p><strong>Livreur ID:</strong> {colis.livreur}</p>
-          <p><strong>Statut:</strong> En cours de livraison</p>
+          <p><strong>Nom Livreur:</strong> {tracking?.livreur_nom || 'N/A'}</p>
+          <p><strong>Contact:</strong> {tracking?.livreur_phone || 'N/A'}</p>
         </div>
       )}
 
@@ -129,8 +128,10 @@ export default function TrackingPublic({ colis_id }) {
           <img src={colis.photo_colis} alt="Photo du colis" style={{maxWidth: '100%', height: 'auto', borderRadius: '5px'}} />
         </div>
       )}
+    </div>
+  );
+}
 
-     
 const styles = {
   container: {
     maxWidth: '800px',
@@ -140,7 +141,7 @@ const styles = {
     backgroundColor: '#f9f9f9',
     minHeight: '100vh'
   },
-  header: {
+       header: {
     textAlign: 'center',
     marginBottom: '40px',
     borderBottom: '3px solid #007BFF',
