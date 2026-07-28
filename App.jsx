@@ -4,6 +4,7 @@ import ParcelDetailsModal from './ParcelDetailsModal';
 import TrackingPublic from './TrackingPublic';
 import './App.css';
 import './styles-premium.css';
+import LoginPage from './LoginPage';
 
 function App() {
 // Récupérer l'ID du colis depuis l'URL pour suivi public
@@ -22,6 +23,7 @@ function App() {
   const [livreurs, setLivreurs] = useState([]);
 const [currentPage, setCurrentPage] = useState(1);
 const [totalPages, setTotalPages] = useState(1);
+const [entreprise, setEntreprise] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showParcelForm, setShowParcelForm] = useState(false);
@@ -51,6 +53,19 @@ const [totalPages, setTotalPages] = useState(1);
     nom: '',
     phone: ''
   });
+
+const [entreprise, setEntreprise] = useState(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('entreprise');
+    if (stored) {
+      setEntreprise(JSON.parse(stored));
+    }
+  }, []);
+
+  if (!entreprise) {
+    return <LoginPage onLoginSuccess={setEntreprise} />;
+  }
 
   // ====================================
   // FETCH DATA
