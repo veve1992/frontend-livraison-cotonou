@@ -54,10 +54,9 @@ const [entreprise, setEntreprise] = useState(null);
     phone: ''
   });
 
-const [entreprise, setEntreprise] = useState(null);
-
-  useEffect(() => {
+useEffect(() => {
     const stored = localStorage.getItem('entreprise');
+  
     if (stored) {
       setEntreprise(JSON.parse(stored));
     }
