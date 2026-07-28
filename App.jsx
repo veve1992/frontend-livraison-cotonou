@@ -7,23 +7,24 @@ import './styles-premium.css';
 import LoginPage from './LoginPage';
 
 function App() {
-// Récupérer l'ID du colis depuis l'URL pour suivi public
+  // ====================================
+  // ÉTAPE 1 : SUIVI PUBLIC (avant TOUS les états)
+  // ====================================
   const urlParams = new URLSearchParams(window.location.search);
   const tracking_id = urlParams.get('tracking');
-
-  // Page de suivi PUBLIQUE
   if (tracking_id) {
     return <TrackingPublic colis_id={tracking_id} />;
   }
+
   // ====================================
-  // STATES
+  // ÉTAPE 2 : TOUS LES STATES
   // ====================================
   const [activeTab, setActiveTab] = useState('dashboard');
   const [parcels, setParcels] = useState([]);
   const [livreurs, setLivreurs] = useState([]);
-const [currentPage, setCurrentPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
-const [entreprise, setEntreprise] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [entreprise, setEntreprise] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showParcelForm, setShowParcelForm] = useState(false);
@@ -31,62 +32,50 @@ const [entreprise, setEntreprise] = useState(null);
   const [trackingId, setTrackingId] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedParcel, setSelectedParcel] = useState(null);
+  const [parcelForm, setParcelForm] = useState({
+    de: '', a: '', prix: '', numero_receptionnaire: '',
+    nom_receptionnaire: '', prenom_receptionnaire: '',
+    contact_receptionnaire: '', adresse_livraison: '',
+    description_colis: '', photo_colis: ''
+  });
+  const [livreurForm, setLivreurForm] = useState({ nom: '', phone: '' });
 
-  // API URL
+  // ====================================
+  // ÉTAPE 3 : API URL (constante)
+  // ====================================
   const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
-  // Formulaire Colis
-  const [parcelForm, setParcelForm] = useState({
-  de: '',
-  a: '',
-  prix: '',
-  numero_receptionnaire: '',
-  nom_receptionnaire: '',
-  prenom_receptionnaire: '',
-  contact_receptionnaire: '',
-  adresse_livraison: '',
-  description_colis: '',
-  photo_colis: ''
-});
-  // Formulaire Livreur
-  const [livreurForm, setLivreurForm] = useState({
-    nom: '',
-    phone: ''
-  });
-
-useEffect(() => {
-    const stored = localStorage.getItem('entreprise');
+  // ====================================
+  // ÉTAPE 4 : TOUS LES USEEFFECT (AVANT le if !entreprise)
+  // ====================================
   
+  // UseEffect 1 : Charger entreprise du localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('entreprise');
     if (stored) {
       setEntreprise(JSON.parse(stored));
     }
   }, []);
 
-  if (!entreprise) {
-    return <LoginPage onLoginSuccess={setEntreprise} />;
-  }
-
   // ====================================
-  // FETCH DATA
+  // ÉTAPE 5 : DÉFINIR TOUTES LES FONCTIONS
   // ====================================
   const fetchData = async () => {
     try {
       setLoading(true);
-
       const [parcelRes, livreurRes] = await Promise.all([
-  fetch(`${API_URL}/parcels?page=${currentPage}`),
-  fetch(`${API_URL}/livreurs`)
-]);
-     if (parcelRes.ok) {
-  const data = await parcelRes.json();
-  setParcels(data.data || []);
-  setTotalPages(data.pages || 1);
-}
+        fetch(`${API_URL}/parcels?page=${currentPage}`),
+        fetch(`${API_URL}/livreurs`)
+      ]);
+      if (parcelRes.ok) {
+        const data = await parcelRes.json();
+        setParcels(data.data || []);
+        setTotalPages(data.pages || 1);
+      }
       if (livreurRes.ok) {
         const data = await livreurRes.json();
         setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
       }
-
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
@@ -94,116 +83,6 @@ useEffect(() => {
     }
   };
 
- useEffect(() => {
-  fetchData();
-}, [currentPage, API_URL]);
-const getNomLivreur = async (livreur_id) => {
-  try {
-    const res = await fetch(`${API_URL}/livreurs/${livreur_id}`);
-    const data = await res.json();
-    return data.nom || 'N/A';
-  } catch {
-    return 'N/A';
-  }
-};
-  // ====================================
-  // ADD PARCEL
-  // ====================================
-  const handleAddParcel = async (e) => {
-    e.preventDefault();
-
-    if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
-      alert('❌ Veuillez remplir tous les champs');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/parcels`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-       body: JSON.stringify({
-  de: parcelForm.de.trim(),
-  a: parcelForm.a.trim(),
-  prix: parseInt(parcelForm.prix),
-  nom_receptionnaire: parcelForm.nom_receptionnaire || '',
-  prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
-  contact_receptionnaire: parcelForm.contact_receptionnaire || '',
-  adresse_livraison: parcelForm.adresse_livraison || '',
-  description_colis: parcelForm.description_colis || '',
-  photo_colis: parcelForm.photo_colis || '',
-  status: 'En attente'
-})
-      });
-
-      if (response.ok) {
-        setSuccessMessage('✅ Colis ajouté avec succès !');
-        setParcelForm({
-          de: '',
-          a: '',
-          prix: '',
-          numero_receptionnaire: '',
-          nom_receptionnaire: '',
-          adresse_livraison: ''
-        });
-        setShowParcelForm(false);
-        fetchData();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const error = await response.json();
-        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le colis'}`);
-      }
-    } catch (error) {
-      alert('❌ Erreur de connexion au serveur');
-      console.error(error);
-    }
-  };
-
-  // ====================================
-  // ADD LIVREUR
-  // ====================================
-  const handleAddLivreur = async (e) => {
-    e.preventDefault();
-
-    if (!livreurForm.nom || !livreurForm.phone) {
-      alert('❌ Veuillez remplir tous les champs');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/livreurs`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          nom: livreurForm.nom.trim(),
-          phone: livreurForm.phone.trim()
-        })
-      });
-
-      if (response.ok) {
-        setSuccessMessage('✅ Livreur ajouté avec succès !');
-        setLivreurForm({ nom: '', phone: '' });
-        setShowLivreurForm(false);
-        fetchData();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const error = await response.json();
-        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le livreur'}`);
-      }
-    } catch (error) {
-      alert('❌ Erreur de connexion au serveur');
-      console.error(error);
-    }
-  };
-
-  // ====================================
-  // HELPER FUNCTIONS  ← AJOUTER JUSTE ICI
-  // ====================================
   const getLivreurNom = (livreurId) => {
     if (!livreurId) return '—';
     const id = parseInt(livreurId);
@@ -227,6 +106,91 @@ const getNomLivreur = async (livreur_id) => {
     if (!livreurId) return 0;
     return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
   };
+
+  const handleAddParcel = async (e) => {
+    e.preventDefault();
+    if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
+      alert('❌ Veuillez remplir tous les champs');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/parcels`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          de: parcelForm.de.trim(), a: parcelForm.a.trim(),
+          prix: parseInt(parcelForm.prix),
+          nom_receptionnaire: parcelForm.nom_receptionnaire || '',
+          prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
+          contact_receptionnaire: parcelForm.contact_receptionnaire || '',
+          adresse_livraison: parcelForm.adresse_livraison || '',
+          description_colis: parcelForm.description_colis || '',
+          photo_colis: parcelForm.photo_colis || '',
+          status: 'En attente'
+        })
+      });
+      if (response.ok) {
+        setSuccessMessage('✅ Colis ajouté avec succès !');
+        setParcelForm({
+          de: '', a: '', prix: '', numero_receptionnaire: '',
+          nom_receptionnaire: '', adresse_livraison: ''
+        });
+        setShowParcelForm(false);
+        fetchData();
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        const error = await response.json();
+        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le colis'}`);
+      }
+    } catch (error) {
+      alert('❌ Erreur de connexion au serveur');
+      console.error(error);
+    }
+  };
+
+  const handleAddLivreur = async (e) => {
+    e.preventDefault();
+    if (!livreurForm.nom || !livreurForm.phone) {
+      alert('❌ Veuillez remplir tous les champs');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/livreurs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ nom: livreurForm.nom.trim(), phone: livreurForm.phone.trim() })
+      });
+      if (response.ok) {
+        setSuccessMessage('✅ Livreur ajouté avec succès !');
+        setLivreurForm({ nom: '', phone: '' });
+        setShowLivreurForm(false);
+        fetchData();
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        const error = await response.json();
+        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le livreur'}`);
+      }
+    } catch (error) {
+      alert('❌ Erreur de connexion au serveur');
+      console.error(error);
+    }
+  };
+
+  // ====================================
+  // ÉTAPE 6 : UseEffect 2 - Appeler fetchData (APRÈS toutes les fonctions)
+  // ====================================
+  useEffect(() => {
+    if (entreprise) {
+      fetchData();
+    }
+  }, [currentPage, API_URL, entreprise]);
+
+  // ====================================
+  // ÉTAPE 7 : CONDITION LOGIN (APRÈS tous les hooks et fonctions)
+  // ====================================
+  if (!entreprise) {
+    return <LoginPage onLoginSuccess={setEntreprise} />;
+  }
 
    // ====================================
   // RENDER
