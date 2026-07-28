@@ -635,21 +635,29 @@ const getNomLivreur = async (livreur_id) => {
            {/* Livreur Dashboard */}
 {activeTab === 'livreur' && (
   <div className="tab-content">
-    <h2>🚚 Mon Dashboard Livreur</h2>
+    <h2>🚚 Dashboard Livreur</h2>
     
-    <div className="stats-grid">
-      <div className="stat-card">
-        <h3>Colis à Livrer</h3>
-        <p className="stat-number">{parcels.filter(p => p.status === 'Pris' || p.status === 'En route').length}</p>
-      </div>
-      <div className="stat-card">
-        <h3>Colis Livrés</h3>
-        <p className="stat-number">{parcels.filter(p => p.status === 'Livré').length}</p>
-      </div>
-      <div className="stat-card">
-        <h3>Revenus</h3>
-        <p className="stat-number">{parcels.filter(p => p.status === 'Livré').reduce((sum, p) => sum + (p.prix * 0.2), 0).toFixed(0)} XOF</p>
-      </div>
+    <div className="cards-grid">
+      {livreurs.map(livreur => (
+        <div key={livreur.id} className="livreur-card">
+          <h3>{livreur.nom}</h3>
+          <p className="phone">📱 {livreur.phone}</p>
+          <div className="livreur-stats">
+            <div>
+              <strong>Colis Livrés</strong>
+              <p>{getColisLivresLivreur(livreur.id)}</p>
+            </div>
+            <div>
+              <strong>Colis En Instance</strong>
+              <p>{getColisEnInstanceLivreur(livreur.id)}</p>
+            </div>
+            <div>
+              <strong>Revenu</strong>
+              <p>{getRevenuLivreur(livreur.id)} XOF</p>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
 
     <div className="section-header">
@@ -666,23 +674,24 @@ const getNomLivreur = async (livreur_id) => {
               <th>À</th>
               <th>Client</th>
               <th>Contact</th>
-              <th>Adresse</th>
               <th>Prix</th>
+              <th>Livreur</th>
             </tr>
           </thead>
           <tbody>
-  {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').map(parcel => (
-    <tr key={parcel.id}>
-      <td className="id">#{parcel.id}</td>
-      <td>{parcel.de}</td>
-      <td>{parcel.a}</td>
-      <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
-      <td>{parcel.contact_receptionnaire || 'N/A'}</td>
-      <td>{parcel.adresse_livraison || 'N/A'}</td>
-      <td className="price">{parcel.prix} XOF</td>
-    </tr>
-  ))}
-</tbody>        </table>
+            {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').map(parcel => (
+              <tr key={parcel.id}>
+                <td className="id">#{parcel.id}</td>
+                <td>{parcel.de}</td>
+                <td>{parcel.a}</td>
+                <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
+                <td>{parcel.contact_receptionnaire || 'N/A'}</td>
+                <td className="price">{parcel.prix} XOF</td>
+                <td>{getLivreurNom(parcel.livreur)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     ) : (
       <div className="empty-state">
@@ -690,7 +699,8 @@ const getNomLivreur = async (livreur_id) => {
       </div>
     )}
   </div>
-)} 
+)}
+
           </>
         )}
       </main>
