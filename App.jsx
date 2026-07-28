@@ -186,45 +186,6 @@ const getNomLivreur = async (livreur_id) => {
       console.error(error);
     }
   };
-// ====================================
-  // ADD LIVREUR
-  // ====================================
-  const handleAddLivreur = async (e) => {
-    e.preventDefault();
-
-    if (!livreurForm.nom || !livreurForm.phone) {
-      alert('❌ Veuillez remplir tous les champs');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/livreurs`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          nom: livreurForm.nom.trim(),
-          phone: livreurForm.phone.trim()
-        })
-      });
-
-      if (response.ok) {
-        setSuccessMessage('✅ Livreur ajouté avec succès !');
-        setLivreurForm({ nom: '', phone: '' });
-        setShowLivreurForm(false);
-        fetchData();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const error = await response.json();
-        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le livreur'}`);
-      }
-    } catch (error) {
-      alert('❌ Erreur de connexion au serveur');
-      console.error(error);
-    }
-  };
 
   // ====================================
   // HELPER FUNCTIONS  ← AJOUTER JUSTE ICI
@@ -253,11 +214,7 @@ const getNomLivreur = async (livreur_id) => {
     return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
   };
 
-  // ====================================
-  // RENDER
-  // ====================================
-  return (
-  // ====================================
+   // ====================================
   // RENDER
   // ====================================
   return (
