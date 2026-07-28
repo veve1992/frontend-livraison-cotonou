@@ -186,7 +186,77 @@ const getNomLivreur = async (livreur_id) => {
       console.error(error);
     }
   };
+// ====================================
+  // ADD LIVREUR
+  // ====================================
+  const handleAddLivreur = async (e) => {
+    e.preventDefault();
 
+    if (!livreurForm.nom || !livreurForm.phone) {
+      alert('❌ Veuillez remplir tous les champs');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/livreurs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          nom: livreurForm.nom.trim(),
+          phone: livreurForm.phone.trim()
+        })
+      });
+
+      if (response.ok) {
+        setSuccessMessage('✅ Livreur ajouté avec succès !');
+        setLivreurForm({ nom: '', phone: '' });
+        setShowLivreurForm(false);
+        fetchData();
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        const error = await response.json();
+        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le livreur'}`);
+      }
+    } catch (error) {
+      alert('❌ Erreur de connexion au serveur');
+      console.error(error);
+    }
+  };
+
+  // ====================================
+  // HELPER FUNCTIONS  ← AJOUTER JUSTE ICI
+  // ====================================
+  const getLivreurNom = (livreurId) => {
+    if (!livreurId) return '—';
+    const id = parseInt(livreurId);
+    const livreur = livreurs.find(l => l.id === id);
+    return livreur ? livreur.nom : `Livreur #${id}`;
+  };
+
+  const getRevenuLivreur = (livreurId) => {
+    if (!livreurId) return 0;
+    return parcels
+      .filter(p => parseInt(p.livreur) === parseInt(livreurId) && p.status === 'Livré')
+      .reduce((sum, p) => sum + parseInt(p.prix), 0);
+  };
+
+  const getColisLivresLivreur = (livreurId) => {
+    if (!livreurId) return 0;
+    return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && p.status === 'Livré').length;
+  };
+
+  const getColisEnInstanceLivreur = (livreurId) => {
+    if (!livreurId) return 0;
+    return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
+  };
+
+  // ====================================
+  // RENDER
+  // ====================================
+  return (
   // ====================================
   // RENDER
   // ====================================
