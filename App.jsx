@@ -60,13 +60,13 @@ function App() {
   // ====================================
   // ÉTAPE 5 : DÉFINIR TOUTES LES FONCTIONS
   // ====================================
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [parcelRes, livreurRes] = await Promise.all([
-        fetch(`${API_URL}/parcels?page=${currentPage}`),
-        fetch(`${API_URL}/livreurs`)
-      ]);
+ const fetchData = async () => {
+  try {
+    setLoading(true);
+    const [parcelRes, livreurRes] = await Promise.all([
+      fetch(`${API_URL}/parcels?page=${currentPage}&enterprise_id=${entreprise.id}`),
+      fetch(`${API_URL}/livreurs?enterprise_id=${entreprise.id}`)
+    ]);
       if (parcelRes.ok) {
         const data = await parcelRes.json();
         setParcels(data.data || []);
@@ -114,12 +114,17 @@ function App() {
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/parcels`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          de: parcelForm.de.trim(), a: parcelForm.a.trim(),
-          prix: parseInt(parcelForm.prix),
+     const response = await fetch(`${API_URL}/parcels`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  body: JSON.stringify({
+    de: parcelForm.de.trim(),
+    a: parcelForm.a.trim(),
+    prix: parseInt(parcelForm.prix),
+    enterprise_id: entreprise.id,
           nom_receptionnaire: parcelForm.nom_receptionnaire || '',
           prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
           contact_receptionnaire: parcelForm.contact_receptionnaire || '',
@@ -155,11 +160,18 @@ function App() {
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/livreurs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ nom: livreurForm.nom.trim(), phone: livreurForm.phone.trim() })
-      });
+    const response = await fetch(`${API_URL}/livreurs`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  body: JSON.stringify({
+    nom: livreurForm.nom.trim(),
+    phone: livreurForm.phone.trim(),
+    enterprise_id: entreprise.id
+  })
+});  
       if (response.ok) {
         setSuccessMessage('✅ Livreur ajouté avec succès !');
         setLivreurForm({ nom: '', phone: '' });
@@ -592,7 +604,7 @@ function App() {
   }
 
   try {
-    const response = await fetch(`${API_URL}/tracking/${trackingId}`);
+    const response = await fetch(`${API_URL}/tracking/${trackingId}?enterprise_id=${entreprise.id}`);
     const data = await response.json();
 
     if (data.latitude && data.longitude) {
