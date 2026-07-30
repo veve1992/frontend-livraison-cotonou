@@ -80,16 +80,6 @@ export default function LoginPage({ onLoginSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <input
-              type="text"
-              name="nom_entreprise"
-              placeholder="Nom de votre entreprise"
-              value={formData.nom_entreprise}
-              onChange={handleChange}
-              required
-            />
-          )}
 {!isLogin && (
   <>
     <input
