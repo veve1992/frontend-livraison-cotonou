@@ -3,13 +3,13 @@ import './LoginPage.css';
 
 export default function LoginPage({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
- const [formData, setFormData] = useState({
-  email: '',
-  password: '',
-  nom_entreprise: '',
-  country: '',
-  phone_prefix: ''
-});
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    nom_entreprise: '',
+    country: '',
+    phone_prefix: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -62,7 +62,7 @@ export default function LoginPage({ onLoginSuccess }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>🚚 SaaS Livraison</h1>
+        <h1>🚚 DeliverHub</h1>
         
         <div className="toggle">
           <button 
@@ -80,50 +80,53 @@ export default function LoginPage({ onLoginSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-{!isLogin && (
-  <>
-    <input
-      type="text"
-      name="nom_entreprise"
-      placeholder="Nom de votre entreprise"
-      value={formData.nom_entreprise}
-      onChange={handleChange}
-      required
-    />
-    
-   <select
-  name="country"
-  value={formData.country}
-  onChange={(e) => {
-    const country = e.target.value;
-    const prefixes = {
-      'Bénin': '+229',
-      'Sénégal': '+221',
-      'Côte d\'Ivoire': '+225',
-      'Cameroun': '+237',
-      'France': '+33',
-      'Belgique': '+32',
-      'Canada': '+1',
-      'USA': '+1'
-    };
-    setFormData({
-      ...formData,
-      country: country,
-      phone_prefix: prefixes[country] || ''
-    });
-  }}
-  required
->
-  <option value="">Sélectionnez votre pays</option>
-  <option value="Bénin">🇧🇯 Bénin</option>
-  <option value="Sénégal">🇸🇳 Sénégal</option>
-  <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-  <option value="Cameroun">🇨🇲 Cameroun</option>
-  <option value="France">🇫🇷 France</option>
-  <option value="Belgique">🇧🇪 Belgique</option>
-  <option value="Canada">🇨🇦 Canada</option>
-  <option value="USA">🇺🇸 USA</option>
-</select>
+          {!isLogin && (
+            <>
+              <input
+                type="text"
+                name="nom_entreprise"
+                placeholder="Nom de votre entreprise"
+                value={formData.nom_entreprise}
+                onChange={handleChange}
+                required
+              />
+              
+              <select
+                name="country"
+                value={formData.country}
+                onChange={(e) => {
+                  const country = e.target.value;
+                  const prefixes = {
+                    'Bénin': '+229',
+                    'Sénégal': '+221',
+                    'Côte d\'Ivoire': '+225',
+                    'Cameroun': '+237',
+                    'France': '+33',
+                    'Belgique': '+32',
+                    'Canada': '+1',
+                    'USA': '+1'
+                  };
+                  setFormData({
+                    ...formData,
+                    country: country,
+                    phone_prefix: prefixes[country] || ''
+                  });
+                }}
+                required
+              >
+                <option value="">Sélectionnez votre pays</option>
+                <option value="Bénin">🇧🇯 Bénin</option>
+                <option value="Sénégal">🇸🇳 Sénégal</option>
+                <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+                <option value="Cameroun">🇨🇲 Cameroun</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Belgique">🇧🇪 Belgique</option>
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="USA">🇺🇸 USA</option>
+              </select>
+            </>
+          )}
+
           <input
             type="email"
             name="email"
