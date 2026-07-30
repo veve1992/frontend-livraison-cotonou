@@ -3,12 +3,12 @@ import './LoginPage.css';
 
 export default function LoginPage({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
+ const [formData, setFormData] = useState({
   email: '',
   password: '',
   nom_entreprise: '',
-  country: 'Bénin',
-  phone_prefix: '+229'
+  country: '',
+  phone_prefix: ''
 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -101,24 +101,39 @@ export default function LoginPage({ onLoginSuccess }) {
       required
     />
     
-    <select
-      name="country"
-      value={formData.country}
-      onChange={handleChange}
-      required
-    >
-      <option value="">Sélectionnez votre pays</option>
-      <option value="Bénin">🇧🇯 Bénin (+229)</option>
-      <option value="Sénégal">🇸🇳 Sénégal (+221)</option>
-      <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire (+225)</option>
-      <option value="Cameroun">🇨🇲 Cameroun (+237)</option>
-      <option value="France">🇫🇷 France (+33)</option>
-      <option value="Belgique">🇧🇪 Belgique (+32)</option>
-      <option value="Canada">🇨🇦 Canada (+1)</option>
-      <option value="USA">🇺🇸 USA (+1)</option>
-    </select>
-  </>
-)}
+   <select
+  name="country"
+  value={formData.country}
+  onChange={(e) => {
+    const country = e.target.value;
+    const prefixes = {
+      'Bénin': '+229',
+      'Sénégal': '+221',
+      'Côte d\'Ivoire': '+225',
+      'Cameroun': '+237',
+      'France': '+33',
+      'Belgique': '+32',
+      'Canada': '+1',
+      'USA': '+1'
+    };
+    setFormData({
+      ...formData,
+      country: country,
+      phone_prefix: prefixes[country] || ''
+    });
+  }}
+  required
+>
+  <option value="">Sélectionnez votre pays</option>
+  <option value="Bénin">🇧🇯 Bénin</option>
+  <option value="Sénégal">🇸🇳 Sénégal</option>
+  <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+  <option value="Cameroun">🇨🇲 Cameroun</option>
+  <option value="France">🇫🇷 France</option>
+  <option value="Belgique">🇧🇪 Belgique</option>
+  <option value="Canada">🇨🇦 Canada</option>
+  <option value="USA">🇺🇸 USA</option>
+</select>
           <input
             type="email"
             name="email"

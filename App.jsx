@@ -638,19 +638,19 @@ function App() {
           <h3>{livreur.nom}</h3>
           <p className="phone">📱 {livreur.phone}</p>
           <div className="livreur-stats">
-            <div>
-              <strong>Colis Livrés</strong>
-              <p>{getColisLivresLivreur(livreur.id)}</p>
-            </div>
-            <div>
-              <strong>Colis En Instance</strong>
-              <p>{getColisEnInstanceLivreur(livreur.id)}</p>
-            </div>
-            <div>
-              <strong>Revenu</strong>
-              <p>{getRevenuLivreur(livreur.id)} XOF</p>
-            </div>
-          </div>
+  <div>
+    <strong>Colis Livrés</strong>
+    <p>{getColisLivresLivreur(livreur.id)}</p>
+  </div>
+  <div>
+    <strong>Colis En Instance</strong>
+    <p>{getColisEnInstanceLivreur(livreur.id)}</p>
+  </div>
+  <div>
+    <strong>Revenu</strong>
+    <p>{getRevenuLivreur(livreur.id)} XOF</p>
+  </div>
+</div>
         </div>
       ))}
     </div>
@@ -702,16 +702,16 @@ function App() {
 
       {/* Modal Détails Colis */}
       {selectedParcel && (
-        <ParcelDetailsModal
-          parcel={selectedParcel}
-          livreurs={livreurs}
-          onClose={() => setSelectedParcel(null)}
-          onRefresh={() => {
-            setSelectedParcel(null);
-            fetchData();
-          }}
-        />
-      )}
+  <ParcelDetailsModal
+    parcel={{...selectedParcel, enterprise_id: entreprise.id}}
+    livreurs={livreurs}
+    onClose={() => setSelectedParcel(null)}
+    onRefresh={() => {
+      setSelectedParcel(null);
+      fetchData();
+    }}
+  />
+)}
 
       {/* Footer */}
       <footer className="footer">

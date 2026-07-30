@@ -16,40 +16,40 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
   // ====================================
   // LIVREUR PREND LE COLIS (SMS)
   // ====================================
+const handlePickup = async () => {
+  if (!selectedLivreur) {
+    setError('⚠️ Veuillez sélectionner un livreur');
+    return;
+  }
+  setLoading(true);
+  setError('');
+  try {
+    const response = await fetch(`${API_URL}/parcels/${parcel.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: 'Pris',
+        livreur: parseInt(selectedLivreur),
+        enterprise_id: parcel.enterprise_id
+      })
+    });
 
-  const handlePickup = async () => {
-    if (!selectedLivreur) {
-      setError('⚠️ Veuillez sélectionner un livreur');
-      return;
+    if (response.ok) {
+      alert('✅ Livreur assigné ! SMS envoyé');
+      onRefresh();
+      onClose();
+    } else {
+      const error = await response.json();
+      setError(`❌ Erreur: ${error.error || 'Impossible d\'assigner'}`);
     }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${API_URL}/parcels/${parcel.id}/pickup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          livreur_id: selectedLivreur
-        })
-      });
-
-      if (response.ok) {
-        alert('✅ Colis pris! SMS envoyé au client.');
-        onRefresh();
-        onClose();
-      } else {
-        setError('❌ Erreur lors de la prise du colis');
-      }
-    } catch (err) {
-      setError(`❌ Erreur: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
+  } catch (error) {
+    setError('❌ Erreur de connexion');
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+    return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <button style={styles.closeBtn} onClick={onClose}>✕</button>
@@ -203,11 +203,11 @@ export function ParcelDetailsModal({ parcel, livreurs, onClose, onRefresh }) {
             type="checkbox" 
             onChange={(e) => {
               if (e.target.checked) {
-                fetch(`${API_URL}/parcels/${parcel.id}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ status: 'Livré' })
-                }).then(() => {
+             fetch(`${API_URL}/parcels/${parcel.id}?enterprise_id=${...}`, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ status: 'Pris', enterprise_id: ... })
+}).then(() => {
                   alert('✅ Colis confirmé comme livré !');
                   onRefresh();
                   onClose();
