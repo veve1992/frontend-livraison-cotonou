@@ -4,10 +4,12 @@ import './LoginPage.css';
 export default function LoginPage({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    nom_entreprise: ''
-  });
+  email: '',
+  password: '',
+  nom_entreprise: '',
+  country: 'Bénin',
+  phone_prefix: '+229'
+});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -88,7 +90,35 @@ export default function LoginPage({ onLoginSuccess }) {
               required
             />
           )}
-
+{!isLogin && (
+  <>
+    <input
+      type="text"
+      name="nom_entreprise"
+      placeholder="Nom de votre entreprise"
+      value={formData.nom_entreprise}
+      onChange={handleChange}
+      required
+    />
+    
+    <select
+      name="country"
+      value={formData.country}
+      onChange={handleChange}
+      required
+    >
+      <option value="">Sélectionnez votre pays</option>
+      <option value="Bénin">🇧🇯 Bénin (+229)</option>
+      <option value="Sénégal">🇸🇳 Sénégal (+221)</option>
+      <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire (+225)</option>
+      <option value="Cameroun">🇨🇲 Cameroun (+237)</option>
+      <option value="France">🇫🇷 France (+33)</option>
+      <option value="Belgique">🇧🇪 Belgique (+32)</option>
+      <option value="Canada">🇨🇦 Canada (+1)</option>
+      <option value="USA">🇺🇸 USA (+1)</option>
+    </select>
+  </>
+)}
           <input
             type="email"
             name="email"

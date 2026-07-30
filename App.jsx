@@ -212,11 +212,16 @@ function App() {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <div className="logo">
-            <span className="logo-icon">🚚</span>
-            <h1>Livraison Cotonou</h1>
-          </div>
-          <p className="subtitle">Plateforme de gestion des livraisons</p>
+         <div className="logo">
+  <span className="logo-icon">🚚</span>
+  <h1>DeliverHub</h1>
+</div>
+<p className="subtitle">Plateforme internationale de gestion des livraisons</p>
+{entreprise && (
+  <p className="company-info" style={{fontSize: '14px', marginTop: '5px', color: '#666'}}>
+    📍 {entreprise.country} {entreprise.phone_prefix}
+  </p>
+)}
         </div>
       </header>
 
