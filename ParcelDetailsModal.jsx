@@ -203,10 +203,10 @@ const handlePickup = async () => {
             type="checkbox" 
             onChange={(e) => {
               if (e.target.checked) {
-             fetch(`${API_URL}/parcels/${parcel.id}?enterprise_id=${...}`, {
+             fetch(`${API_URL}/parcels/${parcel.id}?enterprise_id=${parcel.enterprise_id}`, {
   method: 'PUT',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ status: 'Pris', enterprise_id: ... })
+  body: JSON.stringify({ status: 'Livré', enterprise_id: parcel.enterprise_id })
 }).then(() => {
                   alert('✅ Colis confirmé comme livré !');
                   onRefresh();
