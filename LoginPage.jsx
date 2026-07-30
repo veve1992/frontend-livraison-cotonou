@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import './LoginPage.css';
 
 export default function LoginPage({ onLoginSuccess }) {
+  const [userType, setUserType] = useState('gestionnaire'); // 'gestionnaire' ou 'livreur'
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     nom_entreprise: '',
+    nom: '',
+    phone: '',
     country: '',
-    phone_prefix: ''
+    phone_prefix: '',
+    enterprise_id: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,10 +32,33 @@ export default function LoginPage({ onLoginSuccess }) {
     setSuccess('');
 
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const body = isLogin 
-        ? { email: formData.email, password: formData.password }
-        : formData;
+      let endpoint = '';
+      let body = {};
+
+      if (userType === 'gestionnaire') {
+        endpoint = isLogin ? '/auth/login' : '/auth/register';
+        body = isLogin 
+          ? { email: formData.email, password: formData.password }
+          : {
+              email: formData.email,
+              password: formData.password,
+              nom_entreprise: formData.nom_entreprise,
+              country: formData.country,
+              phone_prefix: formData.phone_prefix
+            };
+      } else {
+        // Livreur
+        endpoint = isLogin ? '/auth/livreur/login' : '/auth/livreur/register';
+        body = isLogin
+          ? { email: formData.email, password: formData.password }
+          : {
+              email: formData.email,
+              password: formData.password,
+              nom: formData.nom,
+              phone: formData.phone,
+              enterprise_id: parseInt(formData.enterprise_id)
+            };
+      }
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
@@ -43,17 +70,34 @@ export default function LoginPage({ onLoginSuccess }) {
 
       if (response.ok) {
         setSuccess(data.message);
-        localStorage.setItem('entreprise', JSON.stringify(data.entreprise));
+        
+        // Sauvegarder le bon type d'utilisateur
+        if (userType === 'gestionnaire') {
+          localStorage.setItem('entreprise', JSON.stringify(data.entreprise));
+          localStorage.setItem('userType', 'gestionnaire');
+        } else {
+          localStorage.setItem('livreur', JSON.stringify(data.livreur));
+          localStorage.setItem('entreprise', JSON.stringify(data.entreprise));
+          localStorage.setItem('userType', 'livreur');
+        }
+        
         localStorage.setItem('token', data.token);
         
         setTimeout(() => {
-          if (onLoginSuccess) onLoginSuccess(data.entreprise);
+          if (onLoginSuccess) {
+            if (userType === 'gestionnaire') {
+              onLoginSuccess(data.entreprise, 'gestionnaire');
+            } else {
+              onLoginSuccess(data.livreur, 'livreur');
+            }
+          }
         }, 1500);
       } else {
         setError(data.error || 'Erreur');
       }
     } catch (error) {
       setError('❌ Erreur de connexion au serveur');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -64,7 +108,34 @@ export default function LoginPage({ onLoginSuccess }) {
       <div className="login-card">
         <h1>🚚 DeliverHub</h1>
         
+        {/* SÉLECTEUR TYPE D'UTILISATEUR */}
         <div className="toggle">
+          <button 
+            className={userType === 'gestionnaire' ? 'active' : ''} 
+            onClick={() => {
+              setUserType('gestionnaire');
+              setIsLogin(true);
+              setError('');
+              setSuccess('');
+            }}
+          >
+            👨‍💼 Gestionnaire
+          </button>
+          <button 
+            className={userType === 'livreur' ? 'active' : ''} 
+            onClick={() => {
+              setUserType('livreur');
+              setIsLogin(true);
+              setError('');
+              setSuccess('');
+            }}
+          >
+            🚚 Livreur
+          </button>
+        </div>
+
+        {/* ONGLETS CONNEXION/INSCRIPTION */}
+        <div className="toggle" style={{marginTop: '10px'}}>
           <button 
             className={isLogin ? 'active' : ''} 
             onClick={() => setIsLogin(true)}
@@ -80,7 +151,8 @@ export default function LoginPage({ onLoginSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {!isLogin && (
+          {/* ========== GESTIONNAIRE ========== */}
+          {userType === 'gestionnaire' && !isLogin && (
             <>
               <input
                 type="text"
@@ -127,6 +199,39 @@ export default function LoginPage({ onLoginSuccess }) {
             </>
           )}
 
+          {/* ========== LIVREUR ========== */}
+          {userType === 'livreur' && !isLogin && (
+            <>
+              <input
+                type="text"
+                name="nom"
+                placeholder="Votre nom complet"
+                value={formData.nom}
+                onChange={handleChange}
+                required
+              />
+              
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Votre téléphone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                type="number"
+                name="enterprise_id"
+                placeholder="ID de votre entreprise (donné par le gestionnaire)"
+                value={formData.enterprise_id}
+                onChange={handleChange}
+                required
+              />
+            </>
+          )}
+
+          {/* EMAIL ET PASSWORD (TOUS) */}
           <input
             type="email"
             name="email"
