@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LivreurDashboard from './LivreurDashboard';
 import SignatureComponent from './SignatureComponent';
 import ParcelDetailsModal from './ParcelDetailsModal';
 import TrackingPublic from './TrackingPublic';
@@ -25,6 +26,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [entreprise, setEntreprise] = useState(null);
+const [userType, setUserType] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showParcelForm, setShowParcelForm] = useState(false);
@@ -51,12 +53,18 @@ function App() {
   
   // UseEffect 1 : Charger entreprise du localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('entreprise');
-    if (stored) {
-      setEntreprise(JSON.parse(stored));
-    }
-  }, []);
-
+  const stored = localStorage.getItem('entreprise');
+  const savedUserType = localStorage.getItem('userType');
+  const savedLivreur = localStorage.getItem('livreur');
+  
+  if (savedUserType === 'livreur' && savedLivreur) {
+    setUserType('livreur');
+    setEntreprise(JSON.parse(stored));
+  } else if (stored) {
+    setUserType('gestionnaire');
+    setEntreprise(JSON.parse(stored));
+  }
+}, []);
   // ====================================
   // ÉTAPE 5 : DÉFINIR TOUTES LES FONCTIONS
   // ====================================
@@ -201,9 +209,16 @@ function App() {
   // ÉTAPE 7 : CONDITION LOGIN (APRÈS tous les hooks et fonctions)
   // ====================================
   if (!entreprise) {
-    return <LoginPage onLoginSuccess={setEntreprise} />;
+    return <LoginPage onLoginSuccess={(user, type) => {
+      setUserType(type);
+      setEntreprise(user);
+    }} />;
   }
-
+// Afficher LivreurDashboard si c'est un livreur
+if (userType === 'livreur') {
+  const livreur = JSON.parse(localStorage.getItem('livreur'));
+  return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
+}
    // ====================================
   // RENDER
   // ====================================
