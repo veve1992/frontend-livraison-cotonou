@@ -73,28 +73,27 @@ export default function LoginPage({ onLoginSuccess }) {
         
         // Sauvegarder le bon type d'utilisateur
         if (userType === 'gestionnaire') {
-          localStorage.setItem('entreprise', JSON.stringify(data.entreprise));
-          localStorage.setItem('userType', 'gestionnaire');
-        } else {
-          localStorage.setItem('livreur', JSON.stringify(data.livreur));
-          localStorage.setItem('entreprise', JSON.stringify(data.entreprise));
-          localStorage.setItem('userType', 'livreur');
-        }
-        
-        localStorage.setItem('token', data.token);
-        
-        setTimeout(() => {
-          if (onLoginSuccess) {
-            if (userType === 'gestionnaire') {
-              onLoginSuccess(data.entreprise, 'gestionnaire');
-            } else {
-              onLoginSuccess(data.livreur, 'livreur');
-            }
-          }
-        }, 1500);
-      } else {
-        setError(data.error || 'Erreur');
-      }
+          
+// Structure unique et sécurisée
+const userData = {
+  type: userType,
+  user: userType === 'gestionnaire' ? data.entreprise : data.livreur,
+  entreprise: data.entreprise,
+  token: data.token,
+  timestamp: Date.now()
+};
+localStorage.setItem('currentUser', JSON.stringify(userData));
+
+setTimeout(() => {
+  if (onLoginSuccess) {
+    if (userType === 'gestionnaire') {
+      onLoginSuccess(data.entreprise, 'gestionnaire');
+    } else {
+      onLoginSuccess(data.livreur, 'livreur');
+    }
+  }
+}, 1500);
+
     } catch (error) {
       setError('❌ Erreur de connexion au serveur');
       console.error(error);

@@ -52,17 +52,12 @@ const [userType, setUserType] = useState(null);
   // ====================================
   
   // UseEffect 1 : Charger entreprise du localStorage
-  useEffect(() => {
-  const stored = localStorage.getItem('entreprise');
-  const savedUserType = localStorage.getItem('userType');
-  const savedLivreur = localStorage.getItem('livreur');
-  
-  if (savedUserType === 'livreur' && savedLivreur) {
-    setUserType('livreur');
-    setEntreprise(JSON.parse(stored));
-  } else if (stored) {
-    setUserType('gestionnaire');
-    setEntreprise(JSON.parse(stored));
+ useEffect(() => {
+  const saved = localStorage.getItem('currentUser');
+  if (saved) {
+    const userData = JSON.parse(saved);
+    setUserType(userData.type);
+    setEntreprise(userData.entreprise);
   }
 }, []);
   // ====================================
@@ -71,25 +66,36 @@ const [userType, setUserType] = useState(null);
  const fetchData = async () => {
   try {
     setLoading(true);
+    
+    // Récupérer le token JWT
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
     const [parcelRes, livreurRes] = await Promise.all([
-      fetch(`${API_URL}/parcels?page=${currentPage}&enterprise_id=${entreprise.id}`),
-      fetch(`${API_URL}/livreurs?enterprise_id=${entreprise.id}`)
+      fetch(`${API_URL}/parcels?page=${currentPage}&enterprise_id=${entreprise.id}`, { headers }),
+      fetch(`${API_URL}/livreurs?enterprise_id=${entreprise.id}`, { headers })
     ]);
-      if (parcelRes.ok) {
-        const data = await parcelRes.json();
-        setParcels(data.data || []);
-        setTotalPages(data.pages || 1);
-      }
-      if (livreurRes.ok) {
-        const data = await livreurRes.json();
-        setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
+    
+    if (parcelRes.ok) {
+      const data = await parcelRes.json();
+      setParcels(data.data || []);
+      setTotalPages(data.pages || 1);
     }
-  };
+    if (livreurRes.ok) {
+      const data = await livreurRes.json();
+      setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
+    }
+  } catch (error) {
+    console.error('Erreur:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getLivreurNom = (livreurId) => {
     if (!livreurId) return '—';
@@ -114,88 +120,99 @@ const [userType, setUserType] = useState(null);
     if (!livreurId) return 0;
     return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
   };
-
-  const handleAddParcel = async (e) => {
-    e.preventDefault();
-    if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
-      alert('❌ Veuillez remplir tous les champs');
-      return;
-    }
-    try {
-     const response = await fetch(`${API_URL}/parcels`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  body: JSON.stringify({
-    de: parcelForm.de.trim(),
-    a: parcelForm.a.trim(),
-    prix: parseInt(parcelForm.prix),
-    enterprise_id: entreprise.id,
-          nom_receptionnaire: parcelForm.nom_receptionnaire || '',
-          prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
-          contact_receptionnaire: parcelForm.contact_receptionnaire || '',
-          adresse_livraison: parcelForm.adresse_livraison || '',
-          description_colis: parcelForm.description_colis || '',
-          photo_colis: parcelForm.photo_colis || '',
-          status: 'En attente'
-        })
+const handleAddParcel = async (e) => {
+  e.preventDefault();
+  if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
+    alert('❌ Veuillez remplir tous les champs');
+    return;
+  }
+  try {
+    // Récupérer le token JWT
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
+    const response = await fetch(`${API_URL}/parcels`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        de: parcelForm.de.trim(),
+        a: parcelForm.a.trim(),
+        prix: parseInt(parcelForm.prix),
+        enterprise_id: entreprise.id,
+        nom_receptionnaire: parcelForm.nom_receptionnaire || '',
+        prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
+        contact_receptionnaire: parcelForm.contact_receptionnaire || '',
+        adresse_livraison: parcelForm.adresse_livraison || '',
+        description_colis: parcelForm.description_colis || '',
+        photo_colis: parcelForm.photo_colis || '',
+        status: 'En attente'
+      })
+    });
+    
+    if (response.ok) {
+      alert('✅ Colis ajouté avec succès !');
+      setParcelForm({
+        de: '', a: '', prix: '', nom_receptionnaire: '',
+        prenom_receptionnaire: '', contact_receptionnaire: '',
+        adresse_livraison: '', description_colis: '', photo_colis: ''
       });
-      if (response.ok) {
-        setSuccessMessage('✅ Colis ajouté avec succès !');
-        setParcelForm({
-          de: '', a: '', prix: '', numero_receptionnaire: '',
-          nom_receptionnaire: '', adresse_livraison: ''
-        });
-        setShowParcelForm(false);
-        fetchData();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const error = await response.json();
-        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le colis'}`);
-      }
-    } catch (error) {
-      alert('❌ Erreur de connexion au serveur');
-      console.error(error);
+      fetchData();
+    } else {
+      const error = await response.json();
+      alert('❌ Erreur: ' + (error.error || 'Impossible d\'ajouter le colis'));
     }
-  };
-
-  const handleAddLivreur = async (e) => {
-    e.preventDefault();
-    if (!livreurForm.nom || !livreurForm.phone) {
-      alert('❌ Veuillez remplir tous les champs');
-      return;
-    }
-    try {
+  } catch (error) {
+    alert('❌ Erreur de connexion');
+    console.error(error);
+  }
+};
+ const handleAddLivreur = async (e) => {
+  e.preventDefault();
+  if (!livreurForm.nom || !livreurForm.phone) {
+    alert('❌ Veuillez remplir tous les champs');
+    return;
+  }
+  try {
+    // Récupérer le token JWT
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
     const response = await fetch(`${API_URL}/livreurs`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  body: JSON.stringify({
-    nom: livreurForm.nom.trim(),
-    phone: livreurForm.phone.trim(),
-    enterprise_id: entreprise.id
-  })
-});  
-      if (response.ok) {
-        setSuccessMessage('✅ Livreur ajouté avec succès !');
-        setLivreurForm({ nom: '', phone: '' });
-        setShowLivreurForm(false);
-        fetchData();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        const error = await response.json();
-        alert(`❌ Erreur: ${error.error || 'Impossible d\'ajouter le livreur'}`);
-      }
-    } catch (error) {
-      alert('❌ Erreur de connexion au serveur');
-      console.error(error);
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        nom: livreurForm.nom.trim(),
+        phone: livreurForm.phone.trim(),
+        enterprise_id: entreprise.id
+      })
+    });
+    
+    if (response.ok) {
+      alert('✅ Livreur ajouté avec succès !');
+      setLivreurForm({ nom: '', phone: '' });
+      fetchData();
+    } else {
+      const error = await response.json();
+      alert('❌ Erreur: ' + (error.error || 'Impossible d\'ajouter le livreur'));
     }
-  };
-
+  } catch (error) {
+    alert('❌ Erreur de connexion au serveur');
+    console.error(error);
+  }
+};
+  
   // ====================================
   // ÉTAPE 6 : UseEffect 2 - Appeler fetchData (APRÈS toutes les fonctions)
   // ====================================
@@ -624,7 +641,15 @@ if (userType === 'livreur') {
   }
 
   try {
-    const response = await fetch(`${API_URL}/tracking/${trackingId}?enterprise_id=${entreprise.id}`);
+    const saved = localStorage.getItem('currentUser');
+const token = saved ? JSON.parse(saved).token : '';
+
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${token}`
+};
+
+const response = await fetch(`${API_URL}/tracking/${trackingId}?enterprise_id=${entreprise.id}`, { headers });
     const data = await response.json();
 
     if (data.latitude && data.longitude) {
