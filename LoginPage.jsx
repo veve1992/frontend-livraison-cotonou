@@ -68,32 +68,31 @@ export default function LoginPage({ onLoginSuccess }) {
 
       const data = await response.json();
 
-      if (response.ok) {
+     if (response.ok) {
         setSuccess(data.message);
         
-        // Sauvegarder le bon type d'utilisateur
-        if (userType === 'gestionnaire') {
-          
-// Structure unique et sécurisée
-const userData = {
-  type: userType,
-  user: userType === 'gestionnaire' ? data.entreprise : data.livreur,
-  entreprise: data.entreprise,
-  token: data.token,
-  timestamp: Date.now()
-};
-localStorage.setItem('currentUser', JSON.stringify(userData));
+        // Structure unique et sécurisée
+        const userData = {
+          type: userType,
+          user: userType === 'gestionnaire' ? data.entreprise : data.livreur,
+          entreprise: data.entreprise,
+          token: data.token,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
 
-setTimeout(() => {
-  if (onLoginSuccess) {
-    if (userType === 'gestionnaire') {
-      onLoginSuccess(data.entreprise, 'gestionnaire');
-    } else {
-      onLoginSuccess(data.livreur, 'livreur');
-    }
-  }
-}, 1500);
-
+        setTimeout(() => {
+          if (onLoginSuccess) {
+            if (userType === 'gestionnaire') {
+              onLoginSuccess(data.entreprise, 'gestionnaire');
+            } else {
+              onLoginSuccess(data.livreur, 'livreur');
+            }
+          }
+        }, 1500);
+      } else {
+        setError(data.error || 'Erreur');
+      }
     } catch (error) {
       setError('❌ Erreur de connexion au serveur');
       console.error(error);
@@ -101,7 +100,6 @@ setTimeout(() => {
       setLoading(false);
     }
   };
-
   return (
     <div className="login-container">
       <div className="login-card">
