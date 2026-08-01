@@ -8,24 +8,35 @@ export default function LivreurDashboard({ livreur, entreprise }) {
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
-  const fetchMesColis = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `${API_URL}/livreur/mes-colis/${livreur.id}?enterprise_id=${entreprise.id}&page=${currentPage}`
-      );
-      const data = await response.json();
-      
-      if (response.ok) {
-        setColis(data.data);
-        setTotalPages(data.pages);
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
+ const fetchMesColis = async () => {
+  try {
+    setLoading(true);
+    
+    // Récupérer le token JWT
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
+    const response = await fetch(
+      `${API_URL}/livreur/mes-colis/${livreur.id}?enterprise_id=${entreprise.id}&page=${currentPage}`,
+      { headers }
+    );
+    const data = await response.json();
+    
+    if (response.ok) {
+      setColis(data.data);
+      setTotalPages(data.pages);
     }
-  };
+  } catch (error) {
+    console.error('Erreur:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (livreur && entreprise) {
@@ -48,29 +59,37 @@ export default function LivreurDashboard({ livreur, entreprise }) {
   };
 
   const handleConfirmerLivraison = async (coliId) => {
-    if (!window.confirm('Confirmer la livraison de ce colis ?')) return;
-
-    try {
-      const response = await fetch(`${API_URL}/parcels/${coliId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'Livré',
-          enterprise_id: entreprise.id
-        })
-      });
-
-      if (response.ok) {
-        alert('✅ Colis marqué comme livré !');
-        fetchMesColis();
-      } else {
-        alert('❌ Erreur');
-      }
-    } catch (error) {
-      alert('❌ Erreur: ' + error.message);
+  if (!window.confirm('Confirmer la livraison de ce colis ?')) return;
+  
+  try {
+    // Récupérer le token JWT
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
+    const response = await fetch(`${API_URL}/parcels/${coliId}`, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({
+        status: 'Livré',
+        enterprise_id: entreprise.id
+      })
+    });
+    
+    if (response.ok) {
+      alert('✅ Colis marqué comme livré !');
+      fetchMesColis();
+    } else {
+      alert('❌ Erreur');
     }
-  };
-
+  } catch (error) {
+    alert('❌ Erreur: ' + error.message);
+  }
+};
   const styles = {
     container: {
       padding: '20px',
