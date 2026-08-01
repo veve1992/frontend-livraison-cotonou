@@ -47,20 +47,23 @@ export default function LoginPage({ onLoginSuccess }) {
               country: formData.country,
               phone_prefix: formData.phone_prefix
             };
-      } else {
-        // Livreur
-        endpoint = isLogin ? '/auth/livreur/login' : '/auth/livreur/register';
-        body = isLogin
-          ? { email: formData.email, password: formData.password }
-          : {
-              email: formData.email,
-              password: formData.password,
-              nom: formData.nom,
-              phone: formData.phone,
-              company_code: formData.company_code.toUpperCase()
-            };
+     } else {
+  // Livreur
+  endpoint = isLogin ? '/auth/livreur/login' : '/auth/livreur/register';
+  body = isLogin
+    ? { 
+        email: formData.email, 
+        password: formData.password,
+        company_code: formData.company_code.toUpperCase()
       }
-
+    : {
+        email: formData.email,
+        password: formData.password,
+        nom: formData.nom,
+        phone: formData.phone,
+        company_code: formData.company_code.toUpperCase()
+      };
+}
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
