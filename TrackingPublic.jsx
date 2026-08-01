@@ -17,9 +17,9 @@ export default function TrackingPublic({ company_code, colis_id }) {
         }
 
         // Récupérer le colis avec vérification du company_code
-        const colisRes = await fetch(
-          `${API_URL}/parcels/${colis_id}?company_code=${company_code}`
-        );
+       const colisRes = await fetch(
+  `${API_URL}/tracking/public/${company_code}/${colis_id}`
+);
         
         if (!colisRes.ok) {
           if (colisRes.status === 404) {
