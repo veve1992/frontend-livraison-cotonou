@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const LivreurDashboard = ({ livreur, entreprise }) => {
   const API_URL = 'https://saas-livraison-cotonou-backend.onrender.com';
@@ -8,12 +8,11 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   
-  // GPS & Signature
+  // GPS & Confirmation
   const [selectedColis, setSelectedColis] = useState(null);
   const [gps, setGps] = useState({ latitude: null, longitude: null });
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmationChecked, setConfirmationChecked] = useState(false);
 
   const fetchMesColis = async () => {
     try {
@@ -83,45 +82,7 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
     );
   };
 
-  // ✅ SIGNATURE CANVAS
-  useEffect(() => {
-    if (showSignatureModal && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 2;
-    }
-  }, [showSignatureModal]);
-
-  const handleCanvasMouseDown = () => setIsDrawing(true);
-  const handleCanvasMouseUp = () => setIsDrawing(false);
-  const handleCanvasMouseMove = (e) => {
-    if (!isDrawing || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const getSignatureData = () => {
-    return canvasRef.current.toDataURL('image/png');
-  };
-
-  // ✅ CONFIRMER LIVRAISON AVEC GPS + SIGNATURE
+  // ✅ CONFIRMER LIVRAISON AVEC GPS
   const handleConfirmerLivraison = async () => {
     if (!selectedColis) {
       alert('❌ Aucun colis sélectionné');
@@ -133,9 +94,10 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
       return;
     }
 
-    const signature = getSignatureData();
-
-    if (!window.confirm('Confirmer la livraison de ce colis ?')) return;
+    if (!confirmationChecked) {
+      alert('❌ Veuillez cocher la case de confirmation');
+      return;
+    }
 
     try {
       const saved = localStorage.getItem('currentUser');
@@ -153,15 +115,15 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
           status: 'Livré',
           enterprise_id: entreprise.id,
           latitude: gps.latitude,
-          longitude: gps.longitude,
-          signature: signature
+          longitude: gps.longitude
         })
       });
 
       if (response.ok) {
-        alert('✅ Colis marqué comme livré avec GPS + Signature !');
+        alert('✅ Colis marqué comme livré !\n📍 GPS enregistré\n🕐 Heure de livraison enregistrée');
         setGps({ latitude: null, longitude: null });
-        setShowSignatureModal(false);
+        setConfirmationChecked(false);
+        setShowConfirmModal(false);
         setSelectedColis(null);
         fetchMesColis();
       } else {
@@ -211,6 +173,7 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
               <th style={{ padding: '10px', textAlign: 'left' }}>Client</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Contact</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Statut</th>
+              <th style={{ padding: '10px', textAlign: 'left' }}>Heure Livraison</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Actions</th>
             </tr>
           </thead>
@@ -234,12 +197,15 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
                   </span>
                 </td>
                 <td style={{ padding: '10px' }}>
+                  {c.date_livraison ? new Date(c.date_livraison).toLocaleString('fr-FR') : '—'}
+                </td>
+                <td style={{ padding: '10px' }}>
                   {c.status !== 'Livré' && (
                     <button
                       onClick={() => {
                         setSelectedColis(c);
                         captureGPS();
-                        setTimeout(() => setShowSignatureModal(true), 500);
+                        setTimeout(() => setShowConfirmModal(true), 500);
                       }}
                       style={{
                         background: '#4caf50',
@@ -279,8 +245,8 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
         </button>
       </div>
 
-      {/* SIGNATURE MODAL */}
-      {showSignatureModal && (
+      {/* CONFIRMATION MODAL (SIMPLE) */}
+      {showConfirmModal && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -301,63 +267,70 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
             maxWidth: '500px',
             width: '90%'
           }}>
-            <h2>✍️ Signature de Réception</h2>
-            <p>📍 Position GPS : {gps.latitude?.toFixed(6)}, {gps.longitude?.toFixed(6)}</p>
+            <h2>📍 Confirmer la Livraison</h2>
+            
+            {/* GPS INFO */}
+            <div style={{ background: '#e3f2fd', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+              <p><strong>📍 Position GPS Capturée :</strong></p>
+              <p>{gps.latitude?.toFixed(6)}, {gps.longitude?.toFixed(6)}</p>
+            </div>
 
-            <p style={{ fontSize: '14px', color: '#666' }}>Signez dans la zone ci-dessous :</p>
-            <canvas
-              ref={canvasRef}
-              width={400}
-              height={200}
-              onMouseDown={handleCanvasMouseDown}
-              onMouseUp={handleCanvasMouseUp}
-              onMouseMove={handleCanvasMouseMove}
-              style={{
-                border: '2px solid #ccc',
-                borderRadius: '4px',
-                cursor: 'crosshair',
-                display: 'block',
-                margin: '10px auto',
-                background: 'white'
-              }}
-            />
+            {/* COLIS INFO */}
+            <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+              <p><strong>📦 Colis #{selectedColis?.id}</strong></p>
+              <p>{selectedColis?.de} → {selectedColis?.a}</p>
+              <p>Client : {selectedColis?.nom_receptionnaire}</p>
+            </div>
 
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
-              <button
-                onClick={clearSignature}
-                style={{
-                  background: '#ff9800',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px 15px',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                🔄 Effacer
-              </button>
+            {/* CHECKBOX CONFIRMATION */}
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <label style={{ fontSize: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="checkbox"
+                  checked={confirmationChecked}
+                  onChange={(e) => setConfirmationChecked(e.target.checked)}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                />
+                <span>✅ Je confirme la livraison de ce colis</span>
+              </label>
+            </div>
+
+            {/* HEURE LIVRAISON INFO */}
+            <div style={{ background: '#fff3e0', padding: '10px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
+              <p>🕐 L'heure de livraison sera enregistrée automatiquement</p>
+            </div>
+
+            {/* BOUTONS */}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
                 onClick={handleConfirmerLivraison}
+                disabled={!confirmationChecked}
                 style={{
-                  background: '#4caf50',
+                  background: confirmationChecked ? '#4caf50' : '#ccc',
                   color: 'white',
                   border: 'none',
-                  padding: '10px 15px',
+                  padding: '10px 20px',
                   borderRadius: '4px',
-                  cursor: 'pointer'
+                  cursor: confirmationChecked ? 'pointer' : 'not-allowed',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
                 }}
               >
                 ✅ Confirmer Livraison
               </button>
               <button
-                onClick={() => setShowSignatureModal(false)}
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setConfirmationChecked(false);
+                }}
                 style={{
                   background: '#f44336',
                   color: 'white',
                   border: 'none',
-                  padding: '10px 15px',
+                  padding: '10px 20px',
                   borderRadius: '4px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontSize: '16px'
                 }}
               >
                 ❌ Annuler
