@@ -8,11 +8,11 @@ export default function LoginPage({ onLoginSuccess }) {
     email: '',
     password: '',
     nom_entreprise: '',
+    company_code: '',
     nom: '',
     phone: '',
     country: '',
-    phone_prefix: '',
-    enterprise_id: ''
+    phone_prefix: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -43,6 +43,7 @@ export default function LoginPage({ onLoginSuccess }) {
               email: formData.email,
               password: formData.password,
               nom_entreprise: formData.nom_entreprise,
+              company_code: formData.company_code.toUpperCase(),
               country: formData.country,
               phone_prefix: formData.phone_prefix
             };
@@ -56,7 +57,7 @@ export default function LoginPage({ onLoginSuccess }) {
               password: formData.password,
               nom: formData.nom,
               phone: formData.phone,
-              enterprise_id: parseInt(formData.enterprise_id)
+              company_code: formData.company_code.toUpperCase()
             };
       }
 
@@ -68,7 +69,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
       const data = await response.json();
 
-     if (response.ok) {
+      if (response.ok) {
         setSuccess(data.message);
         
         // Structure unique et sécurisée
@@ -100,6 +101,7 @@ export default function LoginPage({ onLoginSuccess }) {
       setLoading(false);
     }
   };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -157,6 +159,16 @@ export default function LoginPage({ onLoginSuccess }) {
                 placeholder="Nom de votre entreprise"
                 value={formData.nom_entreprise}
                 onChange={handleChange}
+                required
+              />
+
+              <input
+                type="text"
+                name="company_code"
+                placeholder="Code de votre entreprise (ex: ALPHA-PARIS)"
+                value={formData.company_code}
+                onChange={handleChange}
+                maxLength="50"
                 required
               />
               
@@ -218,11 +230,12 @@ export default function LoginPage({ onLoginSuccess }) {
               />
 
               <input
-                type="number"
-                name="enterprise_id"
-                placeholder="ID de votre entreprise (donné par le gestionnaire)"
-                value={formData.enterprise_id}
+                type="text"
+                name="company_code"
+                placeholder="Code de votre entreprise (ex: ALPHA-PARIS)"
+                value={formData.company_code}
                 onChange={handleChange}
+                maxLength="50"
                 required
               />
             </>
