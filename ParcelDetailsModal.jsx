@@ -24,16 +24,25 @@ const handlePickup = async () => {
   setLoading(true);
   setError('');
   try {
+    // Récupérer le token JWT
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
     const response = await fetch(`${API_URL}/parcels/${parcel.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify({
         status: 'Pris',
         livreur: parseInt(selectedLivreur),
         enterprise_id: parcel.enterprise_id
       })
     });
-
+    
     if (response.ok) {
       alert('✅ Livreur assigné ! SMS envoyé');
       onRefresh();
