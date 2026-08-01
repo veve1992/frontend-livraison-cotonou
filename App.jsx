@@ -26,11 +26,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [entreprise, setEntreprise] = useState(null);
-const [userType, setUserType] = useState(null);
+  const [userType, setUserType] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showParcelForm, setShowParcelForm] = useState(false);
-  const [showLivreurForm, setShowLivreurForm] = useState(false);
   const [trackingId, setTrackingId] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedParcel, setSelectedParcel] = useState(null);
@@ -40,7 +39,6 @@ const [userType, setUserType] = useState(null);
     contact_receptionnaire: '', adresse_livraison: '',
     description_colis: '', photo_colis: ''
   });
-  const [livreurForm, setLivreurForm] = useState({ nom: '', phone: '' });
 
   // ====================================
   // ÉTAPE 3 : API URL (constante)
@@ -52,50 +50,51 @@ const [userType, setUserType] = useState(null);
   // ====================================
   
   // UseEffect 1 : Charger entreprise du localStorage
- useEffect(() => {
-  const saved = localStorage.getItem('currentUser');
-  if (saved) {
-    const userData = JSON.parse(saved);
-    setUserType(userData.type);
-    setEntreprise(userData.entreprise);
-  }
-}, []);
+  useEffect(() => {
+    const saved = localStorage.getItem('currentUser');
+    if (saved) {
+      const userData = JSON.parse(saved);
+      setUserType(userData.type);
+      setEntreprise(userData.entreprise);
+    }
+  }, []);
+
   // ====================================
   // ÉTAPE 5 : DÉFINIR TOUTES LES FONCTIONS
   // ====================================
- const fetchData = async () => {
-  try {
-    setLoading(true);
-    
-    // Récupérer le token JWT
-    const saved = localStorage.getItem('currentUser');
-    const token = saved ? JSON.parse(saved).token : '';
-    
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-    
-    const [parcelRes, livreurRes] = await Promise.all([
-      fetch(`${API_URL}/parcels?page=${currentPage}&enterprise_id=${entreprise.id}`, { headers }),
-      fetch(`${API_URL}/livreurs?enterprise_id=${entreprise.id}`, { headers })
-    ]);
-    
-    if (parcelRes.ok) {
-      const data = await parcelRes.json();
-      setParcels(data.data || []);
-      setTotalPages(data.pages || 1);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Récupérer le token JWT
+      const saved = localStorage.getItem('currentUser');
+      const token = saved ? JSON.parse(saved).token : '';
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const [parcelRes, livreurRes] = await Promise.all([
+        fetch(`${API_URL}/parcels?page=${currentPage}&enterprise_id=${entreprise.id}`, { headers }),
+        fetch(`${API_URL}/livreurs?enterprise_id=${entreprise.id}`, { headers })
+      ]);
+      
+      if (parcelRes.ok) {
+        const data = await parcelRes.json();
+        setParcels(data.data || []);
+        setTotalPages(data.pages || 1);
+      }
+      if (livreurRes.ok) {
+        const data = await livreurRes.json();
+        setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+    } finally {
+      setLoading(false);
     }
-    if (livreurRes.ok) {
-      const data = await livreurRes.json();
-      setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
-    }
-  } catch (error) {
-    console.error('Erreur:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const getLivreurNom = (livreurId) => {
     if (!livreurId) return '—';
@@ -120,99 +119,60 @@ const [userType, setUserType] = useState(null);
     if (!livreurId) return 0;
     return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
   };
-const handleAddParcel = async (e) => {
-  e.preventDefault();
-  if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
-    alert('❌ Veuillez remplir tous les champs');
-    return;
-  }
-  try {
-    // Récupérer le token JWT
-    const saved = localStorage.getItem('currentUser');
-    const token = saved ? JSON.parse(saved).token : '';
-    
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-    
-    const response = await fetch(`${API_URL}/parcels`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        de: parcelForm.de.trim(),
-        a: parcelForm.a.trim(),
-        prix: parseInt(parcelForm.prix),
-        enterprise_id: entreprise.id,
-        nom_receptionnaire: parcelForm.nom_receptionnaire || '',
-        prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
-        contact_receptionnaire: parcelForm.contact_receptionnaire || '',
-        adresse_livraison: parcelForm.adresse_livraison || '',
-        description_colis: parcelForm.description_colis || '',
-        photo_colis: parcelForm.photo_colis || '',
-        status: 'En attente'
-      })
-    });
-    
-    if (response.ok) {
-      alert('✅ Colis ajouté avec succès !');
-      setParcelForm({
-        de: '', a: '', prix: '', nom_receptionnaire: '',
-        prenom_receptionnaire: '', contact_receptionnaire: '',
-        adresse_livraison: '', description_colis: '', photo_colis: ''
+
+  const handleAddParcel = async (e) => {
+    e.preventDefault();
+    if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
+      alert('❌ Veuillez remplir tous les champs');
+      return;
+    }
+    try {
+      // Récupérer le token JWT
+      const saved = localStorage.getItem('currentUser');
+      const token = saved ? JSON.parse(saved).token : '';
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const response = await fetch(`${API_URL}/parcels`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          de: parcelForm.de.trim(),
+          a: parcelForm.a.trim(),
+          prix: parseInt(parcelForm.prix),
+          enterprise_id: entreprise.id,
+          nom_receptionnaire: parcelForm.nom_receptionnaire || '',
+          prenom_receptionnaire: parcelForm.prenom_receptionnaire || '',
+          contact_receptionnaire: parcelForm.contact_receptionnaire || '',
+          adresse_livraison: parcelForm.adresse_livraison || '',
+          description_colis: parcelForm.description_colis || '',
+          photo_colis: parcelForm.photo_colis || '',
+          status: 'En attente'
+        })
       });
-      fetchData();
-    } else {
-      const error = await response.json();
-      alert('❌ Erreur: ' + (error.error || 'Impossible d\'ajouter le colis'));
+      
+      if (response.ok) {
+        alert('✅ Colis ajouté avec succès !');
+        setParcelForm({
+          de: '', a: '', prix: '', nom_receptionnaire: '',
+          prenom_receptionnaire: '', contact_receptionnaire: '',
+          adresse_livraison: '', description_colis: '', photo_colis: ''
+        });
+        fetchData();
+      } else {
+        const error = await response.json();
+        alert('❌ Erreur: ' + (error.error || 'Impossible d\'ajouter le colis'));
+      }
+    } catch (error) {
+      alert('❌ Erreur de connexion');
+      console.error(error);
     }
-  } catch (error) {
-    alert('❌ Erreur de connexion');
-    console.error(error);
-  }
-};
- const handleAddLivreur = async (e) => {
-  e.preventDefault();
-  if (!livreurForm.nom || !livreurForm.phone) {
-    alert('❌ Veuillez remplir tous les champs');
-    return;
-  }
-  try {
-    // Récupérer le token JWT
-    const saved = localStorage.getItem('currentUser');
-    const token = saved ? JSON.parse(saved).token : '';
-    
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-    
-    const response = await fetch(`${API_URL}/livreurs`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        nom: livreurForm.nom.trim(),
-        phone: livreurForm.phone.trim(),
-        enterprise_id: entreprise.id
-      })
-    });
-    
-    if (response.ok) {
-      alert('✅ Livreur ajouté avec succès !');
-      setLivreurForm({ nom: '', phone: '' });
-      fetchData();
-    } else {
-      const error = await response.json();
-      alert('❌ Erreur: ' + (error.error || 'Impossible d\'ajouter le livreur'));
-    }
-  } catch (error) {
-    alert('❌ Erreur de connexion au serveur');
-    console.error(error);
-  }
-};
-  
+  };
+ 
   // ====================================
   // ÉTAPE 6 : UseEffect 2 - Appeler fetchData (APRÈS toutes les fonctions)
   // ====================================
@@ -231,13 +191,15 @@ const handleAddParcel = async (e) => {
       setEntreprise(user);
     }} />;
   }
-// Afficher LivreurDashboard si c'est un livreur
-if (userType === 'livreur') {
-  const saved = localStorage.getItem('currentUser');
-  const livreur = saved ? JSON.parse(saved).user : null;
-  return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
-}
-   // ====================================
+
+  // Afficher LivreurDashboard si c'est un livreur
+  if (userType === 'livreur') {
+    const saved = localStorage.getItem('currentUser');
+    const livreur = saved ? JSON.parse(saved).user : null;
+    return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
+  }
+
+  // ====================================
   // RENDER
   // ====================================
   return (
@@ -245,16 +207,16 @@ if (userType === 'livreur') {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-         <div className="logo">
-  <span className="logo-icon">🚚</span>
-  <h1>DeliverHub</h1>
-</div>
-<p className="subtitle">Plateforme internationale de gestion des livraisons</p>
-{entreprise && (
-  <p className="company-info" style={{fontSize: '14px', marginTop: '5px', color: '#666'}}>
-    📍 {entreprise.country} {entreprise.phone_prefix}
-  </p>
-)}
+          <div className="logo">
+            <span className="logo-icon">🚚</span>
+            <h1>DeliverHub</h1>
+          </div>
+          <p className="subtitle">Plateforme internationale de gestion des livraisons</p>
+          {entreprise && (
+            <p className="company-info" style={{fontSize: '14px', marginTop: '5px', color: '#666'}}>
+              📍 {entreprise.country} {entreprise.phone_prefix}
+            </p>
+          )}
         </div>
       </header>
 
@@ -419,27 +381,26 @@ if (userType === 'livreur') {
                         onChange={(e) => setParcelForm({...parcelForm, nom_receptionnaire: e.target.value})}
                       />
                     </div>
-<div className="form-group">
-  <label>Prénom du client</label>
-  <input
-    type="text"
-    placeholder="Jean"
-    value={parcelForm.prenom_receptionnaire}
-    onChange={(e) => setParcelForm({...parcelForm, prenom_receptionnaire: e.target.value})}
-    required
-  />
-</div>
-
-<div className="form-group">
-  <label>Contact du client</label>
-  <input
-    type="tel"
-    placeholder="+22961234567"
-    value={parcelForm.contact_receptionnaire}
-    onChange={(e) => setParcelForm({...parcelForm, contact_receptionnaire: e.target.value})}
-    required
-  />
-</div>
+                    <div className="form-group">
+                      <label>Prénom du client</label>
+                      <input
+                        type="text"
+                        placeholder="Jean"
+                        value={parcelForm.prenom_receptionnaire}
+                        onChange={(e) => setParcelForm({...parcelForm, prenom_receptionnaire: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Contact du client</label>
+                      <input
+                        type="tel"
+                        placeholder="+22961234567"
+                        value={parcelForm.contact_receptionnaire}
+                        onChange={(e) => setParcelForm({...parcelForm, contact_receptionnaire: e.target.value})}
+                        required
+                      />
+                    </div>
                     <div className="form-group">
                       <label>Adresse de livraison</label>
                       <input
@@ -449,33 +410,32 @@ if (userType === 'livreur') {
                         onChange={(e) => setParcelForm({...parcelForm, adresse_livraison: e.target.value})}
                       />
                     </div>
-<div className="form-group">
-  <label>Description du colis</label>
-  <textarea
-    placeholder="Ex: Électronique fragile, livrer avec soin..."
-    value={parcelForm.description_colis}
-    onChange={(e) => setParcelForm({...parcelForm, description_colis: e.target.value})}
-    rows="4"
-  />
-</div>
-
-<div className="form-group">
-  <label>Photo du colis</label>
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setParcelForm({...parcelForm, photo_colis: event.target.result});
-        };
-        reader.readAsDataURL(file);
-      }
-    }}
-  />
-</div>
+                    <div className="form-group">
+                      <label>Description du colis</label>
+                      <textarea
+                        placeholder="Ex: Électronique fragile, livrer avec soin..."
+                        value={parcelForm.description_colis}
+                        onChange={(e) => setParcelForm({...parcelForm, description_colis: e.target.value})}
+                        rows="4"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Photo du colis</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setParcelForm({...parcelForm, photo_colis: event.target.result});
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </div>
                     <button type="submit" className="btn-submit">Ajouter le colis</button>
                   </form>
                 )}
@@ -522,7 +482,7 @@ if (userType === 'livreur') {
                           </tr>
                         ))}
                       </tbody>
-              </table>
+                    </table>
                     {totalPages > 1 && (
                       <div style={{marginTop: '20px', textAlign: 'center', padding: '15px'}}>
                         <button 
@@ -558,38 +518,11 @@ if (userType === 'livreur') {
             {activeTab === 'livreurs' && (
               <div className="tab-content">
                 <div className="section-header">
-                  <h2>Gestion des Livreurs</h2>
-                  <button className="btn-add" onClick={() => setShowLivreurForm(!showLivreurForm)}>
-                    {showLivreurForm ? '✕ Fermer' : '+ Ajouter un livreur'}
-                  </button>
+                  <h2>👥 Gestion des Livreurs</h2>
+                  <p style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+                    💡 Les livreurs s'inscrivent directement avec le code entreprise : <strong>{entreprise.company_code}</strong>
+                  </p>
                 </div>
-
-                {showLivreurForm && (
-                  <form className="form-card" onSubmit={handleAddLivreur}>
-                    <h3>Ajouter un nouveau livreur</h3>
-                    <div className="form-group">
-                      <label>Nom du livreur</label>
-                      <input
-                        type="text"
-                        placeholder="Ex: Jean Doe"
-                        value={livreurForm.nom}
-                        onChange={(e) => setLivreurForm({...livreurForm, nom: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Téléphone</label>
-                      <input
-                        type="tel"
-                        placeholder="Ex: +229 90123456"
-                        value={livreurForm.phone}
-                        onChange={(e) => setLivreurForm({...livreurForm, phone: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn-submit">Ajouter le livreur</button>
-                  </form>
-                )}
 
                 {livreurs.length > 0 ? (
                   <div className="cards-grid">
@@ -617,7 +550,7 @@ if (userType === 'livreur') {
                 ) : (
                   <div className="empty-state">
                     <p>👥 Aucun livreur enregistré</p>
-                    <p className="hint">Cliquez "Ajouter un livreur" pour commencer !</p>
+                    <p className="hint">Les livreurs s'inscrivent directement en utilisant le code entreprise</p>
                   </div>
                 )}
               </div>
@@ -635,107 +568,108 @@ if (userType === 'livreur') {
                     onChange={(e) => setTrackingId(e.target.value)}
                   />
                   
-<button className="btn-add" onClick={async () => {
-  if (!trackingId) {
-    alert('⚠️ Veuillez entrer un numéro de colis');
-    return;
-  }
+                  <button className="btn-add" onClick={async () => {
+                    if (!trackingId) {
+                      alert('⚠️ Veuillez entrer un numéro de colis');
+                      return;
+                    }
 
-  try {
-    const saved = localStorage.getItem('currentUser');
-const token = saved ? JSON.parse(saved).token : '';
+                    try {
+                      const saved = localStorage.getItem('currentUser');
+                      const token = saved ? JSON.parse(saved).token : '';
 
-const headers = {
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${token}`
-};
+                      const headers = {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      };
 
-const response = await fetch(`${API_URL}/tracking/${trackingId}?enterprise_id=${entreprise.id}`, { headers });
-    const data = await response.json();
+                      const response = await fetch(`${API_URL}/tracking/${trackingId}?enterprise_id=${entreprise.id}`, { headers });
+                      const data = await response.json();
 
-    if (data.latitude && data.longitude) {
-      alert(`📍 SUIVI COLIS #${trackingId}\n📍 Position: ${data.latitude}, ${data.longitude}\n📍 Adresse: ${data.adresse || 'En cours'}\n📍 Statut: ${data.status || 'En route'}`);
-    } else {
-      alert('⚠️ Aucune position enregistrée pour ce colis');
-    }
-  } catch (error) {
-    console.error('Erreur:', error);
-    alert('❌ Erreur lors du suivi');
-  }
-}}>
-  🔍 Suivre
-</button>                                  </div>
+                      if (data.latitude && data.longitude) {
+                        alert(`📍 SUIVI COLIS #${trackingId}\n📍 Position: ${data.latitude}, ${data.longitude}\n📍 Adresse: ${data.adresse || 'En cours'}\n📍 Statut: ${data.status || 'En route'}`);
+                      } else {
+                        alert('⚠️ Aucune position enregistrée pour ce colis');
+                      }
+                    } catch (error) {
+                      console.error('Erreur:', error);
+                      alert('❌ Erreur lors du suivi');
+                    }
+                  }}>
+                    🔍 Suivre
+                  </button>
+                </div>
               </div>
             )}
 
-           {/* Livreur Dashboard */}
-{activeTab === 'livreur' && (
-  <div className="tab-content">
-    <h2>🚚 Dashboard Livreur</h2>
-    
-    <div className="cards-grid">
-      {livreurs.map(livreur => (
-        <div key={livreur.id} className="livreur-card">
-          <h3>{livreur.nom}</h3>
-          <p className="phone">📱 {livreur.phone}</p>
-          <div className="livreur-stats">
-  <div>
-    <strong>Colis Livrés</strong>
-    <p>{getColisLivresLivreur(livreur.id)}</p>
-  </div>
-  <div>
-    <strong>Colis En Instance</strong>
-    <p>{getColisEnInstanceLivreur(livreur.id)}</p>
-  </div>
-  <div>
-    <strong>Revenu</strong>
-    <p>{getRevenuLivreur(livreur.id)} XOF</p>
-  </div>
-</div>
-        </div>
-      ))}
-    </div>
+            {/* Livreur Dashboard */}
+            {activeTab === 'livreur' && (
+              <div className="tab-content">
+                <h2>🚚 Dashboard Livreur</h2>
+                
+                <div className="cards-grid">
+                  {livreurs.map(livreur => (
+                    <div key={livreur.id} className="livreur-card">
+                      <h3>{livreur.nom}</h3>
+                      <p className="phone">📱 {livreur.phone}</p>
+                      <div className="livreur-stats">
+                        <div>
+                          <strong>Colis Livrés</strong>
+                          <p>{getColisLivresLivreur(livreur.id)}</p>
+                        </div>
+                        <div>
+                          <strong>Colis En Instance</strong>
+                          <p>{getColisEnInstanceLivreur(livreur.id)}</p>
+                        </div>
+                        <div>
+                          <strong>Revenu</strong>
+                          <p>{getRevenuLivreur(livreur.id)} XOF</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-    <div className="section-header">
-      <h3>Colis à Livrer</h3>
-    </div>
+                <div className="section-header">
+                  <h3>Colis à Livrer</h3>
+                </div>
 
-    {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').length > 0 ? (
-      <div className="table-container">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>De</th>
-              <th>À</th>
-              <th>Client</th>
-              <th>Contact</th>
-              <th>Prix</th>
-              <th>Livreur</th>
-            </tr>
-          </thead>
-          <tbody>
-            {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').map(parcel => (
-              <tr key={parcel.id}>
-                <td className="id">#{parcel.id}</td>
-                <td>{parcel.de}</td>
-                <td>{parcel.a}</td>
-                <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
-                <td>{parcel.contact_receptionnaire || 'N/A'}</td>
-                <td className="price">{parcel.prix} XOF</td>
-                <td>{getLivreurNom(parcel.livreur)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div className="empty-state">
-        <p>🎉 Aucun colis à livrer!</p>
-      </div>
-    )}
-  </div>
-)}
+                {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').length > 0 ? (
+                  <div className="table-container">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>De</th>
+                          <th>À</th>
+                          <th>Client</th>
+                          <th>Contact</th>
+                          <th>Prix</th>
+                          <th>Livreur</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parcels.filter(p => p.status === 'Pris' || p.status === 'En route').map(parcel => (
+                          <tr key={parcel.id}>
+                            <td className="id">#{parcel.id}</td>
+                            <td>{parcel.de}</td>
+                            <td>{parcel.a}</td>
+                            <td>{parcel.nom_receptionnaire} {parcel.prenom_receptionnaire}</td>
+                            <td>{parcel.contact_receptionnaire || 'N/A'}</td>
+                            <td className="price">{parcel.prix} XOF</td>
+                            <td>{getLivreurNom(parcel.livreur)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <p>🎉 Aucun colis à livrer!</p>
+                  </div>
+                )}
+              </div>
+            )}
 
           </>
         )}
@@ -743,16 +677,16 @@ const response = await fetch(`${API_URL}/tracking/${trackingId}?enterprise_id=${
 
       {/* Modal Détails Colis */}
       {selectedParcel && (
-  <ParcelDetailsModal
-    parcel={{...selectedParcel, enterprise_id: entreprise.id}}
-    livreurs={livreurs}
-    onClose={() => setSelectedParcel(null)}
-    onRefresh={() => {
-      setSelectedParcel(null);
-      fetchData();
-    }}
-  />
-)}
+        <ParcelDetailsModal
+          parcel={{...selectedParcel, enterprise_id: entreprise.id}}
+          livreurs={livreurs}
+          onClose={() => setSelectedParcel(null)}
+          onRefresh={() => {
+            setSelectedParcel(null);
+            fetchData();
+          }}
+        />
+      )}
 
       {/* Footer */}
       <footer className="footer">
