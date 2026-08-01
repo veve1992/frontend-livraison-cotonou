@@ -240,26 +240,40 @@ export default function LoginPage({ onLoginSuccess }) {
               />
             </>
           )}
+{/* ========== LIVREUR LOGIN ========== */}
+{userType === 'livreur' && isLogin && (
+  <>
+    <input
+      type="text"
+      name="company_code"
+      placeholder="Code de votre entreprise (ex: FINAL-TEST-2026)"
+      value={formData.company_code}
+      onChange={handleChange}
+      maxLength="50"
+      required
+    />
+  </>
+)}
 
-          {/* EMAIL ET PASSWORD (TOUS) */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+{/* EMAIL ET PASSWORD (TOUS) */}
+<input
+  type="email"
+  name="email"
+  placeholder="Email"
+  value={formData.email}
+  onChange={handleChange}
+  required
+/>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Mot de passe"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
+<input
+  type="password"
+  name="password"
+  placeholder="Mot de passe"
+  value={formData.password}
+  onChange={handleChange}
+  required
+/>
+         
           <button type="submit" disabled={loading}>
             {loading ? '⏳ Chargement...' : isLogin ? 'Se connecter' : 'S\'inscrire'}
           </button>
