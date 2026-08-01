@@ -233,7 +233,8 @@ const handleAddParcel = async (e) => {
   }
 // Afficher LivreurDashboard si c'est un livreur
 if (userType === 'livreur') {
-  const livreur = JSON.parse(localStorage.getItem('livreur'));
+  const saved = localStorage.getItem('currentUser');
+  const livreur = saved ? JSON.parse(saved).user : null;
   return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
 }
    // ====================================
