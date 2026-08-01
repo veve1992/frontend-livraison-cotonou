@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-export default function TrackingPublic({ colis_id }) {
+export default function TrackingPublic({ company_code, colis_id }) {
   const [colis, setColis] = useState(null);
-  const [tracking, setTracking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -11,31 +10,42 @@ export default function TrackingPublic({ colis_id }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Récupérer le colis
-        const colisRes = await fetch(`${API_URL}/parcels/${colis_id}`);
-        const colisData = await colisRes.json();
-        setColis(colisData);
-
-        // Récupérer le tracking GPS
-        try {
-          const trackingRes = await fetch(`${API_URL}/tracking/${colis_id}`);
-          const trackingData = await trackingRes.json();
-          setTracking(trackingData);
-        } catch {
-          setTracking(null);
+        if (!company_code || !colis_id) {
+          setError('Code entreprise ou ID colis manquant');
+          setLoading(false);
+          return;
         }
 
+        // Récupérer le colis avec vérification du company_code
+        const colisRes = await fetch(
+          `${API_URL}/parcels/${colis_id}?company_code=${company_code}`
+        );
+        
+        if (!colisRes.ok) {
+          if (colisRes.status === 404) {
+            setError('Colis non trouvé ou accès refusé');
+          } else if (colisRes.status === 403) {
+            setError('Colis n\'appartient pas à cette entreprise');
+          } else {
+            setError('Erreur lors de la récupération du colis');
+          }
+          setLoading(false);
+          return;
+        }
+
+        const colisData = await colisRes.json();
+        setColis(colisData.colis || colisData);
         setLoading(false);
       } catch (err) {
-        setError(err.message);
+        setError('Erreur serveur: ' + err.message);
         setLoading(false);
       }
     };
 
-    if (colis_id) {
+    if (company_code && colis_id) {
       fetchData();
     }
-  }, [colis_id]);
+  }, [company_code, colis_id]);
 
   if (loading) {
     return (
@@ -50,7 +60,7 @@ export default function TrackingPublic({ colis_id }) {
     return (
       <div style={styles.container}>
         <h1>❌ Erreur</h1>
-        <p>Colis non trouvé ou erreur serveur</p>
+        <p>{error || 'Colis non trouvé'}</p>
         <button onClick={() => window.location.href = '/'} style={styles.button}>
           ← Retour
         </button>
@@ -58,76 +68,116 @@ export default function TrackingPublic({ colis_id }) {
     );
   }
 
- return (
+  return (
     <div style={styles.container}>
       <div style={styles.header}>
         <h1>📍 Suivi de Votre Colis</h1>
         <p style={styles.colis_id}>Colis #{colis.id}</p>
       </div>
 
-      {/* INFOS GÉNÉRALES */}
+      {/* STATUT PRINCIPAL */}
       <div style={styles.card}>
-        <h2>📦 Détails du Colis</h2>
-        <p><strong>De:</strong> {colis.de}</p>
-        <p><strong>À:</strong> {colis.a}</p>
-        <p><strong>Statut:</strong> {colis.status}</p>
-        <p><strong>Livreur:</strong> {tracking?.livreur_nom || 'En cours'}</p>
-        <p><strong>Contact Livreur:</strong> {tracking?.livreur_phone || 'N/A'}</p>
-      </div>
-
-      {/* STATUS */}
-      <div style={styles.card}>
-        <h2>📦 Statut</h2>
+        <h2>📦 Statut du Colis</h2>
         <p style={styles.status}>
-          <span style={{...styles.badge, backgroundColor: colis.status === 'Livré' ? '#28a745' : colis.status === 'En route' ? '#ffc107' : '#6c757d'}}>
+          <span style={{
+            ...styles.badge, 
+            backgroundColor: colis.status === 'Livré' ? '#4caf50' : 
+                            colis.status === 'En route' ? '#ff9800' : 
+                            colis.status === 'Pris' ? '#2196f3' : '#9e9e9e'
+          }}>
             {colis.status}
           </span>
         </p>
       </div>
 
+      {/* INFOS ITINÉRAIRE */}
+      <div style={styles.card}>
+        <h2>🗺️ Itinéraire</h2>
+        <div style={styles.route}>
+          <div style={styles.routePoint}>
+            <div style={styles.routeDot}>📍</div>
+            <div>
+              <strong>Départ</strong>
+              <p>{colis.de}</p>
+            </div>
+          </div>
+          <div style={styles.routeLine}></div>
+          <div style={styles.routePoint}>
+            <div style={styles.routeDot}>🏁</div>
+            <div>
+              <strong>Arrivée</strong>
+              <p>{colis.a}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* LOCALISATION GPS */}
-      {tracking && tracking.latitude && (
+      {colis.latitude && colis.longitude && (
         <div style={styles.card}>
-          <h2>🗺️ Localisation GPS</h2>
-          <p><strong>Position:</strong> {tracking.latitude}, {tracking.longitude}</p>
-          <p><strong>Adresse:</strong> {tracking.adresse || 'En cours de mise à jour'}</p>
-          <p style={styles.small}>Dernière mise à jour: {new Date(tracking.created_at).toLocaleString('fr-FR')}</p>
+          <h2>📡 Localisation GPS</h2>
+          <p><strong>Position actuelle:</strong> {colis.latitude?.toFixed(6)}, {colis.longitude?.toFixed(6)}</p>
+          <p style={styles.small}>
+            🕐 Mise à jour: {colis.date_livraison ? new Date(colis.date_livraison).toLocaleString('fr-FR') : 'En attente'}
+          </p>
         </div>
       )}
+
+      {/* HEURE DE LIVRAISON */}
+      {colis.date_livraison && (
+        <div style={styles.card}>
+          <h2>🕐 Heure de Livraison</h2>
+          <p><strong>Date et heure:</strong> {new Date(colis.date_livraison).toLocaleString('fr-FR')}</p>
+        </div>
+      )}
+
+      {/* LIVREUR ASSIGNÉ */}
+      {colis.livreur && (
+        <div style={styles.card}>
+          <h2>🚚 Livreur Assigné</h2>
+          <p><strong>ID Livreur:</strong> {colis.livreur}</p>
+          <p style={styles.small}>Votre colis est en cours de livraison</p>
+        </div>
+      )}
+
       {/* DÉTAILS CLIENT */}
       <div style={styles.card}>
-        <h2>👤 Détails Client</h2>
-        <p><strong>Nom:</strong> {colis.nom_receptionnaire || 'N/A'} {colis.prenom_receptionnaire || ''}</p>
+        <h2>👤 Informations de Livraison</h2>
+        <p><strong>Destinataire:</strong> {colis.nom_receptionnaire || 'N/A'} {colis.prenom_receptionnaire || ''}</p>
         <p><strong>Contact:</strong> {colis.contact_receptionnaire || 'N/A'}</p>
         <p><strong>Adresse de livraison:</strong> {colis.adresse_livraison || 'N/A'}</p>
       </div>
 
       {/* DÉTAILS COLIS */}
       <div style={styles.card}>
-        <h2>📮 Détails du Colis</h2>
-        <p><strong>De:</strong> {colis.de}</p>
-        <p><strong>À:</strong> {colis.a}</p>
+        <h2>📦 Détails du Colis</h2>
         <p><strong>Prix:</strong> {colis.prix} XOF</p>
         {colis.description_colis && (
-          <p><strong>Description:</strong> {colis.description_colis}</p>
+          <>
+            <p><strong>Description:</strong> {colis.description_colis}</p>
+          </>
         )}
       </div>
-{/* LIVREUR */}
-      {colis.livreur && (
-        <div style={styles.card}>
-          <h2>🚚 Livreur Assigné</h2>
-          <p><strong>Nom Livreur:</strong> {tracking?.livreur_nom || 'N/A'}</p>
-          <p><strong>Contact:</strong> {tracking?.livreur_phone || 'N/A'}</p>
-        </div>
-      )}
 
       {/* PHOTO */}
       {colis.photo_colis && (
         <div style={styles.card}>
           <h2>📸 Photo du Colis</h2>
-          <img src={colis.photo_colis} alt="Photo du colis" style={{maxWidth: '100%', height: 'auto', borderRadius: '5px'}} />
+          <img 
+            src={colis.photo_colis} 
+            alt="Photo du colis" 
+            style={{maxWidth: '100%', height: 'auto', borderRadius: '5px'}} 
+          />
         </div>
       )}
+
+      {/* FOOTER */}
+      <div style={styles.footer}>
+        <p>Merci pour votre confiance ! Pour toute question, contactez le support.</p>
+        <button onClick={() => window.location.href = '/'} style={styles.button}>
+          ← Retour à l'accueil
+        </button>
+      </div>
     </div>
   );
 }
@@ -141,7 +191,7 @@ const styles = {
     backgroundColor: '#f9f9f9',
     minHeight: '100vh'
   },
-       header: {
+  header: {
     textAlign: 'center',
     marginBottom: '40px',
     borderBottom: '3px solid #007BFF',
@@ -166,11 +216,29 @@ const styles = {
     marginTop: '10px'
   },
   badge: {
-    padding: '8px 16px',
+    padding: '10px 20px',
     borderRadius: '20px',
     color: 'white',
     fontWeight: 'bold',
-    display: 'inline-block'
+    display: 'inline-block',
+    fontSize: '16px'
+  },
+  route: {
+    padding: '20px 0'
+  },
+  routePoint: {
+    display: 'flex',
+    gap: '15px',
+    marginBottom: '10px'
+  },
+  routeDot: {
+    fontSize: '24px'
+  },
+  routeLine: {
+    width: '3px',
+    height: '30px',
+    backgroundColor: '#007BFF',
+    margin: '0 auto 10px 12px'
   },
   small: {
     fontSize: '12px',
@@ -182,7 +250,8 @@ const styles = {
     marginTop: '40px',
     padding: '20px',
     backgroundColor: 'white',
-    borderRadius: '8px'
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
   },
   button: {
     marginTop: '20px',

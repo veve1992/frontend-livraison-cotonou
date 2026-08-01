@@ -9,14 +9,16 @@ import LoginPage from './LoginPage';
 
 function App() {
   // ====================================
-  // ÉTAPE 1 : SUIVI PUBLIC (avant TOUS les états)
-  // ====================================
-  const urlParams = new URLSearchParams(window.location.search);
-  const tracking_id = urlParams.get('tracking');
-  if (tracking_id) {
-    return <TrackingPublic colis_id={tracking_id} />;
-  }
+// ÉTAPE 1 : SUIVI PUBLIC (avant TOUS les états)
+// ====================================
+const pathname = window.location.pathname;
+const suiviMatch = pathname.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
 
+if (suiviMatch) {
+  const company_code = suiviMatch[1];
+  const colis_id = suiviMatch[2];
+  return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
+}
   // ====================================
   // ÉTAPE 2 : TOUS LES STATES
   // ====================================
