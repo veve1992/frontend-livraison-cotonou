@@ -16,10 +16,9 @@ export default function TrackingPublic({ company_code, colis_id }) {
           return;
         }
 
-        // Récupérer le colis avec vérification du company_code
-       const colisRes = await fetch(
-  `${API_URL}/tracking/public/${company_code}/${colis_id}`
-);
+        const colisRes = await fetch(
+          `${API_URL}/tracking/public/${company_code}/${colis_id}`
+        );
         
         if (!colisRes.ok) {
           if (colisRes.status === 404) {
@@ -116,7 +115,7 @@ export default function TrackingPublic({ company_code, colis_id }) {
       {colis.latitude && colis.longitude && (
         <div style={styles.card}>
           <h2>📡 Localisation GPS</h2>
-          <p><strong>Position actuelle:</strong> {colis.latitude?.toFixed(6)}, {colis.longitude?.toFixed(6)}</p>
+          <p><strong>Position actuelle:</strong> {parseFloat(colis.latitude)?.toFixed(6)}, {parseFloat(colis.longitude)?.toFixed(6)}</p>
           <p style={styles.small}>
             🕐 Mise à jour: {colis.date_livraison ? new Date(colis.date_livraison).toLocaleString('fr-FR') : 'En attente'}
           </p>
@@ -135,8 +134,8 @@ export default function TrackingPublic({ company_code, colis_id }) {
       {colis.livreur && (
         <div style={styles.card}>
           <h2>🚚 Livreur Assigné</h2>
-          <p><strong>ID Livreur:</strong> {colis.livreur}</p>
-          <p style={styles.small}>Votre colis est en cours de livraison</p>
+          <p><strong>Nom Livreur:</strong> {colis.livreur_nom || 'N/A'}</p>
+          <p><strong>Contact:</strong> {colis.livreur_phone || 'N/A'}</p>
         </div>
       )}
 
@@ -153,9 +152,7 @@ export default function TrackingPublic({ company_code, colis_id }) {
         <h2>📦 Détails du Colis</h2>
         <p><strong>Prix:</strong> {colis.prix} XOF</p>
         {colis.description_colis && (
-          <>
-            <p><strong>Description:</strong> {colis.description_colis}</p>
-          </>
+          <p><strong>Description:</strong> {colis.description_colis}</p>
         )}
       </div>
 
