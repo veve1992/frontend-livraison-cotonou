@@ -3,6 +3,7 @@ import LivreurDashboard from './LivreurDashboard';
 import SignatureComponent from './SignatureComponent';
 import ParcelDetailsModal from './ParcelDetailsModal';
 import TrackingPublic from './TrackingPublic';
+import LandingPage from './LandingPage';
 import './App.css';
 import './styles-premium.css';
 import LoginPage from './LoginPage';
@@ -18,6 +19,11 @@ if (suiviMatch) {
   const company_code = suiviMatch[1];
   const colis_id = suiviMatch[2];
   return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
+}
+// Si aucune route spéciale, afficher landing page ou dashboard
+const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if (!currentUser) {
+  return <LandingPage />;
 }
   // ====================================
   // ÉTAPE 2 : TOUS LES STATES
