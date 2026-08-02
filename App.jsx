@@ -10,23 +10,7 @@ import LoginPage from './LoginPage';
 
 function App() {
   // ====================================
-// ÉTAPE 1 : SUIVI PUBLIC (avant TOUS les états)
-// ====================================
-const hash = window.location.hash.slice(1); // Enlève le #
-const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
-
-if (suiviMatch) {
-  const company_code = suiviMatch[1];
-  const colis_id = suiviMatch[2];
-  return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
-}
-// Si aucune route spéciale, afficher landing page ou dashboard
-const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-if (!currentUser) {
-  return <LandingPage />;
-}
-  // ====================================
-  // ÉTAPE 2 : TOUS LES STATES
+  // ÉTAPE 1 : TOUS LES STATES (AVANT toute logique)
   // ====================================
   const [activeTab, setActiveTab] = useState('dashboard');
   const [parcels, setParcels] = useState([]);
@@ -49,12 +33,12 @@ if (!currentUser) {
   });
 
   // ====================================
-  // ÉTAPE 3 : API URL (constante)
+  // ÉTAPE 2 : API URL (constante)
   // ====================================
   const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
   // ====================================
-  // ÉTAPE 4 : TOUS LES USEEFFECT (AVANT le if !entreprise)
+  // ÉTAPE 3 : TOUS LES USEEFFECT
   // ====================================
   
   // UseEffect 1 : Charger entreprise du localStorage
@@ -67,14 +51,21 @@ if (!currentUser) {
     }
   }, []);
 
+  // UseEffect 2 : Appeler fetchData
+  useEffect(() => {
+    if (entreprise) {
+      fetchData();
+    }
+  }, [currentPage, API_URL, entreprise]);
+
   // ====================================
-  // ÉTAPE 5 : DÉFINIR TOUTES LES FONCTIONS
+  // ÉTAPE 4 : TOUTES LES FONCTIONS
   // ====================================
+  
   const fetchData = async () => {
     try {
       setLoading(true);
       
-      // Récupérer le token JWT
       const saved = localStorage.getItem('currentUser');
       const token = saved ? JSON.parse(saved).token : '';
       
@@ -135,7 +126,6 @@ if (!currentUser) {
       return;
     }
     try {
-      // Récupérer le token JWT
       const saved = localStorage.getItem('currentUser');
       const token = saved ? JSON.parse(saved).token : '';
       
@@ -180,19 +170,28 @@ if (!currentUser) {
       console.error(error);
     }
   };
- 
-  // ====================================
-  // ÉTAPE 6 : UseEffect 2 - Appeler fetchData (APRÈS toutes les fonctions)
-  // ====================================
-  useEffect(() => {
-    if (entreprise) {
-      fetchData();
-    }
-  }, [currentPage, API_URL, entreprise]);
 
   // ====================================
-  // ÉTAPE 7 : CONDITION LOGIN (APRÈS tous les hooks et fonctions)
+  // ÉTAPE 5 : CONDITIONS DE RETURN (APRÈS tous les hooks et fonctions)
   // ====================================
+
+  // Vérifier le hash pour suivi public
+  const hash = window.location.hash.slice(1);
+  const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
+
+  if (suiviMatch) {
+    const company_code = suiviMatch[1];
+    const colis_id = suiviMatch[2];
+    return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
+  }
+
+  // Afficher LandingPage si pas de login
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  if (!currentUser) {
+    return <LandingPage />;
+  }
+
+  // Vérifier si pas d'entreprise (login requis)
   if (!entreprise) {
     return <LoginPage onLoginSuccess={(user, type) => {
       setUserType(type);
@@ -208,7 +207,7 @@ if (!currentUser) {
   }
 
   // ====================================
-  // RENDER
+  // RENDER DASHBOARD GESTIONNAIRE
   // ====================================
   return (
     <div className="app">
