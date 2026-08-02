@@ -15,7 +15,7 @@ export default function LandingPage() {
           e.preventDefault();
           const code = document.getElementById('code').value;
           const id = document.getElementById('id').value;
-          window.location.href = `/#/suivi/${code}/${id}`;
+          window.location.replace(`/#/suivi/${code}/${id}`);
         }}>
           <input 
             id="code"
@@ -39,9 +39,9 @@ export default function LandingPage() {
 
       <div style={styles.card}>
         <h2>👨‍💼 Gestionnaire</h2>
-        <button onClick={() => window.location.href = '/'} style={styles.buttonSecondary}>
-          📊 Accès Gestionnaire
-        </button>
+        <button onClick={() => window.location.replace('/')} style={styles.buttonSecondary}>
+  📊 Accès Gestionnaire
+</button>
       </div>
 
       <div style={styles.footer}>
