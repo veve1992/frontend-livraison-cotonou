@@ -2,106 +2,97 @@ import React, { useState } from 'react';
 import './LoginPage.css';
 
 export default function LoginPage({ onLoginSuccess }) {
-  const [userType, setUserType] = useState('gestionnaire'); // 'gestionnaire' ou 'livreur'
+  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
+  
+  const [userType, setUserType] = useState('gestionnaire');
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     nom_entreprise: '',
     company_code: '',
-    nom: '',
-    phone: '',
     country: '',
-    phone_prefix: ''
+    phone_prefix: '',
+    nom: '',
+    phone: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
+    
+    let endpoint, body;
+
+    if (userType === 'gestionnaire') {
+      endpoint = isLogin ? '/auth/login' : '/auth/register';
+      body = isLogin
+        ? { email: formData.email, password: formData.password }
+        : {
+            email: formData.email,
+            password: formData.password,
+            nom_entreprise: formData.nom_entreprise,
+            company_code: formData.company_code.toUpperCase(),
+            country: formData.country,
+            phone_prefix: formData.phone_prefix
+          };
+    } else {
+      endpoint = isLogin ? '/auth/livreur/login' : '/auth/livreur/register';
+      body = isLogin
+        ? { 
+            email: formData.email, 
+            password: formData.password,
+            company_code: formData.company_code.toUpperCase()
+          }
+        : {
+            email: formData.email,
+            password: formData.password,
+            nom: formData.nom,
+            phone: formData.phone,
+            company_code: formData.company_code.toUpperCase()
+          };
+    }
 
     try {
-      let endpoint = '';
-      let body = {};
-
-      if (userType === 'gestionnaire') {
-        endpoint = isLogin ? '/auth/login' : '/auth/register';
-        body = isLogin 
-          ? { email: formData.email, password: formData.password }
-          : {
-              email: formData.email,
-              password: formData.password,
-              nom_entreprise: formData.nom_entreprise,
-              company_code: formData.company_code.toUpperCase(),
-              country: formData.country,
-              phone_prefix: formData.phone_prefix
-            };
-     } else {
-  // Livreur
-  endpoint = isLogin ? '/auth/livreur/login' : '/auth/livreur/register';
-  body = isLogin
-    ? { 
-        email: formData.email, 
-        password: formData.password,
-        company_code: formData.company_code.toUpperCase()
-      }
-    : {
-        email: formData.email,
-        password: formData.password,
-        nom: formData.nom,
-        phone: formData.phone,
-        company_code: formData.company_code.toUpperCase()
-      };
-}
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(body)
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(data.message);
+        alert('✅ Connexion réussie');
         
-        // Structure unique et sécurisée
-        const userData = {
+        // Sauvegarder dans localStorage
+        localStorage.setItem('currentUser', JSON.stringify({
           type: userType,
           user: userType === 'gestionnaire' ? data.entreprise : data.livreur,
           entreprise: data.entreprise,
           token: data.token,
           timestamp: Date.now()
-        };
-        localStorage.setItem('currentUser', JSON.stringify(userData));
+        }));
 
+        // Redirection automatique
         setTimeout(() => {
-          if (onLoginSuccess) {
-            if (userType === 'gestionnaire') {
-              onLoginSuccess(data.entreprise, 'gestionnaire');
-            } else {
-              onLoginSuccess(data.livreur, 'livreur');
-            }
-          }
-        }, 1500);
+          window.location.href = '/';
+        }, 500);
+        return;
       } else {
-        setError(data.error || 'Erreur');
+        alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
       }
     } catch (error) {
-      setError('❌ Erreur de connexion au serveur');
+      alert('❌ Erreur de connexion: ' + error.message);
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -109,120 +100,119 @@ export default function LoginPage({ onLoginSuccess }) {
     <div className="login-container">
       <div className="login-card">
         <h1>🚚 DeliverHub</h1>
-        
-        {/* SÉLECTEUR TYPE D'UTILISATEUR */}
-        <div className="toggle">
-          <button 
-            className={userType === 'gestionnaire' ? 'active' : ''} 
+        <p className="subtitle">Plateforme de gestion des livraisons</p>
+
+        {/* Sélection type utilisateur */}
+        <div className="user-type-selector">
+          <button
+            className={`type-btn ${userType === 'gestionnaire' ? 'active' : ''}`}
             onClick={() => {
               setUserType('gestionnaire');
-              setIsLogin(true);
-              setError('');
-              setSuccess('');
+              setFormData({
+                email: '',
+                password: '',
+                nom_entreprise: '',
+                company_code: '',
+                country: '',
+                phone_prefix: '',
+                nom: '',
+                phone: ''
+              });
             }}
           >
             👨‍💼 Gestionnaire
           </button>
-          <button 
-            className={userType === 'livreur' ? 'active' : ''} 
+          <button
+            className={`type-btn ${userType === 'livreur' ? 'active' : ''}`}
             onClick={() => {
               setUserType('livreur');
-              setIsLogin(true);
-              setError('');
-              setSuccess('');
+              setFormData({
+                email: '',
+                password: '',
+                nom_entreprise: '',
+                company_code: '',
+                country: '',
+                phone_prefix: '',
+                nom: '',
+                phone: ''
+              });
             }}
           >
             🚚 Livreur
           </button>
         </div>
 
-        {/* ONGLETS CONNEXION/INSCRIPTION */}
-        <div className="toggle" style={{marginTop: '10px'}}>
-          <button 
-            className={isLogin ? 'active' : ''} 
+        {/* Toggle Connexion/Inscription */}
+        <div className="toggle-auth">
+          <button
+            className={isLogin ? 'active' : ''}
             onClick={() => setIsLogin(true)}
           >
             Connexion
           </button>
-          <button 
-            className={!isLogin ? 'active' : ''} 
+          <button
+            className={!isLogin ? 'active' : ''}
             onClick={() => setIsLogin(false)}
           >
             Inscription
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* ========== GESTIONNAIRE ========== */}
+        {/* Formulaire */}
+        <form onSubmit={handleSubmit} className="login-form">
+          {/* GESTIONNAIRE INSCRIPTION */}
           {userType === 'gestionnaire' && !isLogin && (
             <>
               <input
                 type="text"
                 name="nom_entreprise"
-                placeholder="Nom de votre entreprise"
+                placeholder="Nom de l'entreprise"
                 value={formData.nom_entreprise}
                 onChange={handleChange}
                 required
               />
-
               <input
                 type="text"
                 name="company_code"
-                placeholder="Code de votre entreprise (ex: ALPHA-PARIS)"
+                placeholder="Code entreprise (ex: ALPHA-2026)"
                 value={formData.company_code}
                 onChange={handleChange}
                 maxLength="50"
                 required
               />
-              
               <select
                 name="country"
                 value={formData.country}
-                onChange={(e) => {
-                  const country = e.target.value;
-                  const prefixes = {
-                    'Bénin': '+229',
-                    'Sénégal': '+221',
-                    'Côte d\'Ivoire': '+225',
-                    'Cameroun': '+237',
-                    'France': '+33',
-                    'Belgique': '+32',
-                    'Canada': '+1',
-                    'USA': '+1'
-                  };
-                  setFormData({
-                    ...formData,
-                    country: country,
-                    phone_prefix: prefixes[country] || ''
-                  });
-                }}
+                onChange={handleChange}
                 required
               >
-                <option value="">Sélectionnez votre pays</option>
-                <option value="Bénin">🇧🇯 Bénin</option>
-                <option value="Sénégal">🇸🇳 Sénégal</option>
-                <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-                <option value="Cameroun">🇨🇲 Cameroun</option>
-                <option value="France">🇫🇷 France</option>
-                <option value="Belgique">🇧🇪 Belgique</option>
-                <option value="Canada">🇨🇦 Canada</option>
-                <option value="USA">🇺🇸 USA</option>
+                <option value="">Choisir un pays</option>
+                <option value="France">France</option>
+                <option value="Bénin">Bénin</option>
+                <option value="Togo">Togo</option>
+                <option value="Cameroun">Cameroun</option>
               </select>
+              <input
+                type="text"
+                name="phone_prefix"
+                placeholder="Préfixe téléphonique (ex: +33)"
+                value={formData.phone_prefix}
+                onChange={handleChange}
+              />
             </>
           )}
 
-          {/* ========== LIVREUR ========== */}
+          {/* LIVREUR INSCRIPTION */}
           {userType === 'livreur' && !isLogin && (
             <>
               <input
                 type="text"
                 name="nom"
-                placeholder="Votre nom complet"
+                placeholder="Votre nom"
                 value={formData.nom}
                 onChange={handleChange}
                 required
               />
-              
               <input
                 type="tel"
                 name="phone"
@@ -231,11 +221,10 @@ export default function LoginPage({ onLoginSuccess }) {
                 onChange={handleChange}
                 required
               />
-
               <input
                 type="text"
                 name="company_code"
-                placeholder="Code de votre entreprise (ex: ALPHA-PARIS)"
+                placeholder="Code de votre entreprise (ex: ALPHA-2026)"
                 value={formData.company_code}
                 onChange={handleChange}
                 maxLength="50"
@@ -243,47 +232,53 @@ export default function LoginPage({ onLoginSuccess }) {
               />
             </>
           )}
-{/* ========== LIVREUR LOGIN ========== */}
-{userType === 'livreur' && isLogin && (
-  <>
-    <input
-      type="text"
-      name="company_code"
-      placeholder="Code de votre entreprise (ex: FINAL-TEST-2026)"
-      value={formData.company_code}
-      onChange={handleChange}
-      maxLength="50"
-      required
-    />
-  </>
-)}
 
-{/* EMAIL ET PASSWORD (TOUS) */}
-<input
-  type="email"
-  name="email"
-  placeholder="Email"
-  value={formData.email}
-  onChange={handleChange}
-  required
-/>
+          {/* LIVREUR CONNEXION */}
+          {userType === 'livreur' && isLogin && (
+            <input
+              type="text"
+              name="company_code"
+              placeholder="Code de votre entreprise (ex: FINAL-TEST-2026)"
+              value={formData.company_code}
+              onChange={handleChange}
+              maxLength="50"
+              required
+            />
+          )}
 
-<input
-  type="password"
-  name="password"
-  placeholder="Mot de passe"
-  value={formData.password}
-  onChange={handleChange}
-  required
-/>
-         
-          <button type="submit" disabled={loading}>
-            {loading ? '⏳ Chargement...' : isLogin ? 'Se connecter' : 'S\'inscrire'}
+          {/* EMAIL ET PASSWORD (TOUS) */}
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+
+          <button type="submit" className="btn-submit">
+            {isLogin ? '🔓 Se connecter' : '📝 S\'inscrire'}
           </button>
         </form>
 
-        {error && <div className="error">{error}</div>}
-        {success && <div className="success">{success}</div>}
+        <p className="toggle-text">
+          {isLogin ? "Pas encore de compte? " : "Vous avez déjà un compte? "}
+          <span
+            onClick={() => setIsLogin(!isLogin)}
+            style={{ cursor: 'pointer', color: '#007BFF', fontWeight: 'bold' }}
+          >
+            {isLogin ? 'S\'inscrire' : 'Se connecter'}
+          </span>
+        </p>
       </div>
     </div>
   );
