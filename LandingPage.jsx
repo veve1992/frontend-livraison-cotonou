@@ -13,9 +13,8 @@ export default function LandingPage() {
   };
 
   const handleGestionnaire = () => {
-    window.location.replace('/');
-  };
-
+  window.location.href = '/';
+};
   return (
     <div style={styles.container}>
       <div style={styles.header}>
