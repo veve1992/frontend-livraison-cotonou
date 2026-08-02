@@ -1,6 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function LandingPage() {
+  const [code, setCode] = useState('');
+  const [id, setId] = useState('');
+
+  const handleSuivre = (e) => {
+    e.preventDefault();
+    if (!code || !id) {
+      alert('⚠️ Veuillez remplir tous les champs');
+      return;
+    }
+    window.location.replace(`/#/suivi/${code}/${id}`);
+  };
+
+  const handleGestionnaire = () => {
+    window.location.replace('/');
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -11,23 +27,20 @@ export default function LandingPage() {
       <div style={styles.card}>
         <h2>📍 Suivre Votre Colis</h2>
         <p>Vous avez un code entreprise et un ID de colis ?</p>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          const code = document.getElementById('code').value;
-          const id = document.getElementById('id').value;
-          window.location.replace(`/#/suivi/${code}/${id}`);
-        }}>
+        <form onSubmit={handleSuivre} style={styles.form}>
           <input 
-            id="code"
             type="text" 
             placeholder="Code entreprise (ex: FINAL-TEST-2026)"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
             required
             style={styles.input}
           />
           <input 
-            id="id"
             type="number" 
             placeholder="ID colis (ex: 44)"
+            value={id}
+            onChange={(e) => setId(e.target.value)}
             required
             style={styles.input}
           />
@@ -39,9 +52,12 @@ export default function LandingPage() {
 
       <div style={styles.card}>
         <h2>👨‍💼 Gestionnaire</h2>
-        <button onClick={() => window.location.replace('/')} style={styles.buttonSecondary}>
-  📊 Accès Gestionnaire
-</button>
+        <button 
+          onClick={handleGestionnaire} 
+          style={styles.buttonSecondary}
+        >
+          📊 Accès Gestionnaire
+        </button>
       </div>
 
       <div style={styles.footer}>
@@ -71,17 +87,19 @@ const styles = {
     borderRadius: '8px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
   },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px'
+  },
   input: {
-    width: '100%',
     padding: '12px',
-    marginBottom: '15px',
     border: '1px solid #ddd',
     borderRadius: '4px',
     fontSize: '16px',
     boxSizing: 'border-box'
   },
   button: {
-    width: '100%',
     padding: '12px',
     backgroundColor: '#007BFF',
     color: 'white',
