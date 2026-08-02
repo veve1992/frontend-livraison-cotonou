@@ -50,6 +50,14 @@ function App() {
       setEntreprise(userData.entreprise);
     }
   }, []);
+// UseEffect 3 : Écouter les changements de hash
+useEffect(() => {
+  const handleHashChange = () => {
+    window.location.reload();
+  };
+  window.addEventListener('hashchange', handleHashChange);
+  return () => window.removeEventListener('hashchange', handleHashChange);
+}, []);
 
   // UseEffect 2 : Appeler fetchData
   useEffect(() => {
