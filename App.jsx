@@ -11,8 +11,8 @@ function App() {
   // ====================================
 // ÉTAPE 1 : SUIVI PUBLIC (avant TOUS les états)
 // ====================================
-const pathname = window.location.pathname;
-const suiviMatch = pathname.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
+const hash = window.location.hash.slice(1); // Enlève le #
+const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
 
 if (suiviMatch) {
   const company_code = suiviMatch[1];
