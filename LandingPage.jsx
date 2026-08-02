@@ -1,6 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function LandingPage() {
+  const [code, setCode] = useState('');
+  const [id, setId] = useState('');
+
+  const handleSuivre = () => {
+    if (!code || !id) {
+      alert('⚠️ Veuillez remplir tous les champs');
+      return;
+    }
+    window.location.replace(`/#/suivi/${code}/${id}`);
+  };
+
+  const handleGestionnaire = () => {
+    window.location.replace('/');
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -13,27 +28,21 @@ export default function LandingPage() {
         <p>Vous avez un code entreprise et un ID de colis ?</p>
         <div style={styles.form}>
           <input 
-            id="code-input"
             type="text" 
             placeholder="Code entreprise (ex: FINAL-TEST-2026)"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
             style={styles.input}
           />
           <input 
-            id="id-input"
             type="number" 
             placeholder="ID colis (ex: 44)"
+            value={id}
+            onChange={(e) => setId(e.target.value)}
             style={styles.input}
           />
           <button 
-            onclick={() => {
-              const code = document.getElementById('code-input').value;
-              const id = document.getElementById('id-input').value;
-              if (!code || !id) {
-                alert('⚠️ Veuillez remplir tous les champs');
-                return;
-              }
-              window.location.replace(`/#/suivi/${code}/${id}`);
-            }}
+            onClick={handleSuivre}
             style={styles.button}
           >
             🔍 Suivre le Colis
@@ -44,7 +53,7 @@ export default function LandingPage() {
       <div style={styles.card}>
         <h2>👨‍💼 Gestionnaire</h2>
         <button 
-          onclick={() => window.location.replace('/')}
+          onClick={handleGestionnaire}
           style={styles.buttonSecondary}
         >
           📊 Accès Gestionnaire
