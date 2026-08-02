@@ -185,14 +185,20 @@ useEffect(() => {
 
   // Vérifier le hash pour suivi public
   const hash = window.location.hash.slice(1);
-  const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
+const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
 
-  if (suiviMatch) {
-    const company_code = suiviMatch[1];
-    const colis_id = suiviMatch[2];
-    return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
-  }
+if (suiviMatch) {
+  const company_code = suiviMatch[1];
+  const colis_id = suiviMatch[2];
+  return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
+}
 
+// Si hash = /dashboard, nettoyer localStorage et rafraîchir
+if (hash === '/dashboard') {
+  localStorage.removeItem('currentUser');
+  window.location.href = '/';
+  return null;
+}
   // Afficher LandingPage si pas de login
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   if (!currentUser) {
