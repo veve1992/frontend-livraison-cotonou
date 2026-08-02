@@ -11,10 +11,10 @@ export default function LandingPage() {
     }
     window.location.replace(`/#/suivi/${code}/${id}`);
   };
-const handleGestionnaire = () => {
-  window.location.href = '/#/dashboard';
+  const handleGestionnaire = () => {
+  localStorage.clear();
+  window.location.href = '/#/login';
 };
-  
   return (
     <div style={styles.container}>
       <div style={styles.header}>

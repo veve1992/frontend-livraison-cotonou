@@ -194,11 +194,13 @@ if (suiviMatch) {
 }
 
 // Si hash = /dashboard, nettoyer localStorage et rafraîchir
-if (hash === '/dashboard') {
-  localStorage.removeItem('currentUser');
-  window.location.href = '/';
-  return null;
+if (hash === '/login') {
+  return <LoginPage onLoginSuccess={(user, type) => {
+    setUserType(type);
+    setEntreprise(user);
+  }} />;
 }
+
   // Afficher LandingPage si pas de login
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   if (!currentUser) {
