@@ -136,8 +136,27 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+  <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
       <h1>👋 Bienvenue, {livreur.nom}</h1>
+      <button 
+        onClick={() => {
+          localStorage.clear();
+          window.location.href = '/';
+        }}
+        style={{
+          backgroundColor: '#dc3545',
+          color: 'white',
+          border: 'none',
+          padding: '10px 20px',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontWeight: 'bold'
+        }}
+      >
+        🚪 Déconnexion
+      </button>
+    </div>
       <p>📍 Entreprise {entreprise.nom_entreprise} ({entreprise.country})</p>
 
       {/* STATS */}
