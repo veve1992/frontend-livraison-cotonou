@@ -1,22 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function LandingPage() {
-  const [code, setCode] = useState('');
-  const [id, setId] = useState('');
-
-  const handleSuivre = (e) => {
-    e.preventDefault();
-    if (!code || !id) {
-      alert('⚠️ Veuillez remplir tous les champs');
-      return;
-    }
-    window.location.replace(`/#/suivi/${code}/${id}`);
-  };
-
-  const handleGestionnaire = () => {
-    window.location.replace('/');
-  };
-
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -27,33 +11,40 @@ export default function LandingPage() {
       <div style={styles.card}>
         <h2>📍 Suivre Votre Colis</h2>
         <p>Vous avez un code entreprise et un ID de colis ?</p>
-        <form onSubmit={handleSuivre} style={styles.form}>
+        <div style={styles.form}>
           <input 
+            id="code-input"
             type="text" 
             placeholder="Code entreprise (ex: FINAL-TEST-2026)"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            required
             style={styles.input}
           />
           <input 
+            id="id-input"
             type="number" 
             placeholder="ID colis (ex: 44)"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            required
             style={styles.input}
           />
-          <button type="submit" style={styles.button}>
+          <button 
+            onclick={() => {
+              const code = document.getElementById('code-input').value;
+              const id = document.getElementById('id-input').value;
+              if (!code || !id) {
+                alert('⚠️ Veuillez remplir tous les champs');
+                return;
+              }
+              window.location.replace(`/#/suivi/${code}/${id}`);
+            }}
+            style={styles.button}
+          >
             🔍 Suivre le Colis
           </button>
-        </form>
+        </div>
       </div>
 
       <div style={styles.card}>
         <h2>👨‍💼 Gestionnaire</h2>
         <button 
-          onClick={handleGestionnaire} 
+          onclick={() => window.location.replace('/')}
           style={styles.buttonSecondary}
         >
           📊 Accès Gestionnaire
