@@ -1,3 +1,4 @@
+import ComingSoon from './ComingSoon';
 import React, { useState, useEffect } from 'react';
 import LivreurDashboard from './LivreurDashboard';
 import SignatureComponent from './SignatureComponent';
@@ -202,10 +203,8 @@ if (hash === '/login') {
 }
 
   // Afficher LandingPage si pas de login
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-  if (!currentUser) {
-    return <LandingPage />;
-  }
+ // COMING SOON : Afficher page Coming Soon
+return <ComingSoon />;
 
   // Vérifier si pas d'entreprise (login requis)
   if (!entreprise) {
