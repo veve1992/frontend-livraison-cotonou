@@ -298,7 +298,22 @@ return <ComingSoon />;
         >
           🚚 Livreur
         </button>
-      </nav>
+      
+<button
+  className="nav-btn"
+  onClick={() => {
+    window.location.href = '/#/pricing';
+  }}
+  style={{
+    backgroundColor: '#ffc107',
+    color: 'black',
+    fontWeight: 'bold',
+    marginLeft: 'auto'  // Pousse le bouton à droite
+  }}
+>
+  💳 Plans & Paiement
+</button>
+</nav>
 
       {/* Message de succès */}
       {successMessage && (
