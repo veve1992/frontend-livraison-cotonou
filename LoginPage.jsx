@@ -83,9 +83,9 @@ export default function LoginPage({ onLoginSuccess }) {
         }));
 
         // Redirection automatique
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 500);
+       setTimeout(() => {
+  window.location.href = '/#/dashboard';
+}, 500);
         return;
       } else {
         alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
