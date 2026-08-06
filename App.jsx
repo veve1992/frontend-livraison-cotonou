@@ -206,17 +206,30 @@ if (hash === '/login') {
 if (hash === '/pricing') {
   return <PricingPage />;
 }
-  // Afficher LandingPage si pas de login
- // LandingPage : Afficher landing page
-return <LandingPage />;
-
-  // Vérifier si pas d'entreprise (login requis)
+ // Hash /dashboard
+if (hash === '/dashboard') {
   if (!entreprise) {
     return <LoginPage onLoginSuccess={(user, type) => {
       setUserType(type);
       setEntreprise(user);
     }} />;
   }
+  // Afficher le dashboard gestionnaire
+  return <GestionnaireDashboard userType={userType} entreprise={entreprise} />;
+}
+
+// Si pas d'entreprise = pas connecté = LandingPage
+if (!entreprise) {
+  return <LandingPage />;
+}
+
+// Si entreprise existe = Afficher dashboard
+if (userType === 'livreur') {
+  return <LivreurDashboard />;
+}
+
+// Dashboard gestionnaire par défaut
+return <GestionnaireDashboard userType={userType} entreprise={entreprise} />;
 
   // Afficher LivreurDashboard si c'est un livreur
   if (userType === 'livreur') {
