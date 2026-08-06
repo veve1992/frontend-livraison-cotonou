@@ -1,4 +1,5 @@
 import ComingSoon from './ComingSoon';
+import PricingPage from './PricingPage';
 import React, { useState, useEffect } from 'react';
 import LivreurDashboard from './LivreurDashboard';
 import SignatureComponent from './SignatureComponent';
@@ -202,6 +203,9 @@ if (hash === '/login') {
   }} />;
 }
 
+if (hash === '/pricing') {
+  return <PricingPage />;
+}
   // Afficher LandingPage si pas de login
  // COMING SOON : Afficher page Coming Soon
 return <ComingSoon />;
