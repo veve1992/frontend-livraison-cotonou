@@ -72,13 +72,22 @@ export default function ComingSoon() {
           </div>
         </div>
 
-        {/* Footer */}
-        <div style={styles.footer}>
-          <p>© 2024 DeliverHub - Tous droits réservés</p>
-          <p style={styles.contact}>
-            Questions ? <a href="mailto:support@deliverhub-africa.com" style={styles.link}>support@deliverhub-africa.com</a>
-          </p>
-        </div>
+    {/* Footer */}
+<div style={styles.footer}>
+  <p>© 2024 DeliverHub - Tous droits réservés</p>
+  
+  <p style={{marginTop: '15px'}}>
+    <a 
+      href="/#/pricing" 
+      style={{color: '#ffd700', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px'}}
+    >
+      📊 Voir nos plans d'abonnement →
+    </a>
+  </p>
+  <p style={styles.contact}>
+    Questions ? <a href="mailto:support@deliverhub-africa.com" style={styles.link}>support@deliverhub-africa.com</a>
+  </p>
+</div>   
       </div>
     </div>
   );
