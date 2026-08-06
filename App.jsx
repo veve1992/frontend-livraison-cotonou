@@ -207,8 +207,8 @@ if (hash === '/pricing') {
   return <PricingPage />;
 }
   // Afficher LandingPage si pas de login
- // COMING SOON : Afficher page Coming Soon
-return <ComingSoon />;
+ // LandingPage : Afficher landing page
+return <LandingPage />;
 
   // Vérifier si pas d'entreprise (login requis)
   if (!entreprise) {
