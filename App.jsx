@@ -52,16 +52,17 @@ function App() {
       setEntreprise(userData.entreprise);
     }
   }, []);
-// UseEffect 3 : Écouter les changements de hash
-useEffect(() => {
-  const handleHashChange = () => {
-    window.location.reload();
-  };
-  window.addEventListener('hashchange', handleHashChange);
-  return () => window.removeEventListener('hashchange', handleHashChange);
-}, []);
 
-  // UseEffect 2 : Appeler fetchData
+  // UseEffect 2 : Écouter les changements de hash
+  useEffect(() => {
+    const handleHashChange = () => {
+      window.location.reload();
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // UseEffect 3 : Appeler fetchData
   useEffect(() => {
     if (entreprise) {
       fetchData();
@@ -182,56 +183,54 @@ useEffect(() => {
   };
 
   // ====================================
-  // ÉTAPE 5 : CONDITIONS DE RETURN (APRÈS tous les hooks et fonctions)
+  // ÉTAPE 5 : CONDITIONS DE RETURN (DANS LE BON ORDRE)
   // ====================================
 
   // Vérifier le hash pour suivi public
   const hash = window.location.hash.slice(1);
-const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
+  const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
 
-if (suiviMatch) {
-  const company_code = suiviMatch[1];
-  const colis_id = suiviMatch[2];
-  return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
-}
+  if (suiviMatch) {
+    const company_code = suiviMatch[1];
+    const colis_id = suiviMatch[2];
+    return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
+  }
 
-// Si hash = /dashboard, nettoyer localStorage et rafraîchir
-if (hash === '/login') {
-  return <LoginPage onLoginSuccess={(user, type) => {
-    setUserType(type);
-    setEntreprise(user);
-  }} />;
-}
-
-if (hash === '/pricing') {
-  return <PricingPage />;
-}
- // Hash /dashboard
-if (hash === '/dashboard') {
-  if (!entreprise) {
+  // Hash /login
+  if (hash === '/login') {
     return <LoginPage onLoginSuccess={(user, type) => {
       setUserType(type);
       setEntreprise(user);
     }} />;
   }
-  // Afficher le dashboard gestionnaire
-  return <GestionnaireDashboard userType={userType} entreprise={entreprise} />;
-}
 
-// Si pas d'entreprise = pas connecté = LandingPage
-if (!entreprise) {
-  return <LandingPage />;
-}
+  // Hash /pricing
+  if (hash === '/pricing') {
+    return <PricingPage />;
+  }
 
-// Si entreprise existe = Afficher dashboard
-if (userType === 'livreur') {
-  return <LivreurDashboard />;
-}
+  // Hash /dashboard
+  if (hash === '/dashboard') {
+    if (!entreprise) {
+      return <LoginPage onLoginSuccess={(user, type) => {
+        setUserType(type);
+        setEntreprise(user);
+      }} />;
+    }
+    if (userType === 'livreur') {
+      const saved = localStorage.getItem('currentUser');
+      const livreur = saved ? JSON.parse(saved).user : null;
+      return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
+    }
+    // Continue to render dashboard below
+  }
 
-// Dashboard gestionnaire par défaut
-return <GestionnaireDashboard userType={userType} entreprise={entreprise} />;
+  // Si pas d'entreprise = pas connecté = LandingPage
+  if (!entreprise) {
+    return <LandingPage />;
+  }
 
-  // Afficher LivreurDashboard si c'est un livreur
+  // Si livreur = LivreurDashboard
   if (userType === 'livreur') {
     const saved = localStorage.getItem('currentUser');
     const livreur = saved ? JSON.parse(saved).user : null;
@@ -239,37 +238,37 @@ return <GestionnaireDashboard userType={userType} entreprise={entreprise} />;
   }
 
   // ====================================
-  // RENDER DASHBOARD GESTIONNAIRE
+  // RENDER DASHBOARD GESTIONNAIRE (défaut)
   // ====================================
   return (
     <div className="app">
       {/* Header */}
-     <header className="header">
-  <div className="header-content">
-    <div className="logo">
-      <span className="logo-icon">🚚</span>
-      <h1>DeliverHub</h1>
-    </div>
-    <button 
-      onClick={() => {
-        localStorage.clear();
-        window.location.href = '/';
-      }}
-      style={{
-        position: 'absolute',
-        top: '20px',
-        right: '20px',
-        backgroundColor: '#dc3545',
-        color: 'white',
-        border: 'none',
-        padding: '10px 20px',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontWeight: 'bold'
-      }}
-    >
-      🚪 Déconnexion
-    </button>
+      <header className="header">
+        <div className="header-content">
+          <div className="logo">
+            <span className="logo-icon">🚚</span>
+            <h1>DeliverHub</h1>
+          </div>
+          <button 
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = '/';
+            }}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            🚪 Déconnexion
+          </button>
           <p className="subtitle">Plateforme internationale de gestion des livraisons</p>
           {entreprise && (
             <p className="company-info" style={{fontSize: '14px', marginTop: '5px', color: '#666'}}>
@@ -311,22 +310,21 @@ return <GestionnaireDashboard userType={userType} entreprise={entreprise} />;
         >
           🚚 Livreur
         </button>
-      
-<button
-  className="nav-btn"
-  onClick={() => {
-    window.location.href = '/#/pricing';
-  }}
-  style={{
-    backgroundColor: '#ffc107',
-    color: 'black',
-    fontWeight: 'bold',
-    marginLeft: 'auto'  // Pousse le bouton à droite
-  }}
->
-  💳 Plans & Paiement
-</button>
-</nav>
+        <button
+          className="nav-btn"
+          onClick={() => {
+            window.location.href = '/#/pricing';
+          }}
+          style={{
+            backgroundColor: '#ffc107',
+            color: 'black',
+            fontWeight: 'bold',
+            marginLeft: 'auto'
+          }}
+        >
+          💳 Plans & Paiement
+        </button>
+      </nav>
 
       {/* Message de succès */}
       {successMessage && (
