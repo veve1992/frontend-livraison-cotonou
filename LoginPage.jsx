@@ -1,71 +1,31 @@
 import React, { useState } from 'react';
-import './LoginPage.css';
 
 export default function LoginPage({ onLoginSuccess }) {
-  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
-  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('gestionnaire');
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    nom_entreprise: '',
-    company_code: '',
-    country: '',
-    phone_prefix: '',
-    nom: '',
-    phone: ''
-  });
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const API_URL = import.meta.env.VITE_API_URL || 'https://saas-livraison-cotonou-backend.onrender.com';
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    
-    let endpoint, body;
-
-    if (userType === 'gestionnaire') {
-      endpoint = isLogin ? '/auth/login' : '/auth/register';
-      body = isLogin
-        ? { email: formData.email, password: formData.password }
-        : {
-            email: formData.email,
-            password: formData.password,
-            nom_entreprise: formData.nom_entreprise,
-            company_code: formData.company_code.toUpperCase(),
-            country: formData.country,
-            phone_prefix: formData.phone_prefix
-          };
-    } else {
-      endpoint = isLogin ? '/auth/livreur/login' : '/auth/livreur/register';
-      body = isLogin
-        ? { 
-            email: formData.email, 
-            password: formData.password,
-            company_code: formData.company_code.toUpperCase()
-          }
-        : {
-            email: formData.email,
-            password: formData.password,
-            nom: formData.nom,
-            phone: formData.phone,
-            company_code: formData.company_code.toUpperCase()
-          };
-    }
+    setLoading(true);
 
     try {
+      // Déterminer l'endpoint selon le type utilisateur
+      const endpoint = userType === 'gestionnaire' ? '/login-gestionnaire' : '/login-livreur';
+      
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password
+        })
       });
 
       const data = await response.json();
@@ -81,11 +41,11 @@ export default function LoginPage({ onLoginSuccess }) {
           token: data.token,
           timestamp: Date.now()
         }));
-
-        // Redirection automatique
-       setTimeout(() => {
-  window.location.href = '/#/dashboard';
-}, 500);
+        
+        // Redirection automatique vers dashboard
+        setTimeout(() => {
+          window.location.href = '/#/dashboard';
+        }, 500);
         return;
       } else {
         alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
@@ -93,193 +53,161 @@ export default function LoginPage({ onLoginSuccess }) {
     } catch (error) {
       alert('❌ Erreur de connexion: ' + error.message);
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1>🚚 DeliverHub</h1>
-        <p className="subtitle">Plateforme de gestion des livraisons</p>
-
-        {/* Sélection type utilisateur */}
-        <div className="user-type-selector">
-          <button
-            className={`type-btn ${userType === 'gestionnaire' ? 'active' : ''}`}
-            onClick={() => {
-              setUserType('gestionnaire');
-              setFormData({
-                email: '',
-                password: '',
-                nom_entreprise: '',
-                company_code: '',
-                country: '',
-                phone_prefix: '',
-                nom: '',
-                phone: ''
-              });
-            }}
-          >
-            👨‍💼 Gestionnaire
-          </button>
-          <button
-            className={`type-btn ${userType === 'livreur' ? 'active' : ''}`}
-            onClick={() => {
-              setUserType('livreur');
-              setFormData({
-                email: '',
-                password: '',
-                nom_entreprise: '',
-                company_code: '',
-                country: '',
-                phone_prefix: '',
-                nom: '',
-                phone: ''
-              });
-            }}
-          >
-            🚚 Livreur
-          </button>
+    <div style={styles.container}>
+      <div style={styles.loginBox}>
+        <div style={styles.header}>
+          <h1>🚚 DeliverHub</h1>
+          <p>Plateforme de gestion des livraisons</p>
         </div>
 
-        {/* Toggle Connexion/Inscription */}
-        <div className="toggle-auth">
-          <button
-            className={isLogin ? 'active' : ''}
-            onClick={() => setIsLogin(true)}
-          >
-            Connexion
-          </button>
-          <button
-            className={!isLogin ? 'active' : ''}
-            onClick={() => setIsLogin(false)}
-          >
-            Inscription
-          </button>
-        </div>
+        <form onSubmit={handleLogin} style={styles.form}>
+          <div style={styles.toggleButtons}>
+            <button
+              type="button"
+              onClick={() => setUserType('gestionnaire')}
+              style={{
+                ...styles.toggleBtn,
+                backgroundColor: userType === 'gestionnaire' ? '#3498db' : '#ecf0f1',
+                color: userType === 'gestionnaire' ? 'white' : '#333'
+              }}
+            >
+              👔 Gestionnaire
+            </button>
+            <button
+              type="button"
+              onClick={() => setUserType('livreur')}
+              style={{
+                ...styles.toggleBtn,
+                backgroundColor: userType === 'livreur' ? '#3498db' : '#ecf0f1',
+                color: userType === 'livreur' ? 'white' : '#333'
+              }}
+            >
+              🚚 Livreur
+            </button>
+          </div>
 
-        {/* Formulaire */}
-        <form onSubmit={handleSubmit} className="login-form">
-          {/* GESTIONNAIRE INSCRIPTION */}
-          {userType === 'gestionnaire' && !isLogin && (
-            <>
-              <input
-                type="text"
-                name="nom_entreprise"
-                placeholder="Nom de l'entreprise"
-                value={formData.nom_entreprise}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="text"
-                name="company_code"
-                placeholder="Code entreprise (ex: ALPHA-2026)"
-                value={formData.company_code}
-                onChange={handleChange}
-                maxLength="50"
-                required
-              />
-              <select
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Choisir un pays</option>
-                <option value="France">France</option>
-                <option value="Bénin">Bénin</option>
-                <option value="Togo">Togo</option>
-                <option value="Cameroun">Cameroun</option>
-              </select>
-              <input
-                type="text"
-                name="phone_prefix"
-                placeholder="Préfixe téléphonique (ex: +33)"
-                value={formData.phone_prefix}
-                onChange={handleChange}
-              />
-            </>
-          )}
-
-          {/* LIVREUR INSCRIPTION */}
-          {userType === 'livreur' && !isLogin && (
-            <>
-              <input
-                type="text"
-                name="nom"
-                placeholder="Votre nom"
-                value={formData.nom}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Votre téléphone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="text"
-                name="company_code"
-                placeholder="Code de votre entreprise (ex: ALPHA-2026)"
-                value={formData.company_code}
-                onChange={handleChange}
-                maxLength="50"
-                required
-              />
-            </>
-          )}
-
-          {/* LIVREUR CONNEXION */}
-          {userType === 'livreur' && isLogin && (
+          <div style={styles.formGroup}>
+            <label>📧 Email</label>
             <input
-              type="text"
-              name="company_code"
-              placeholder="Code de votre entreprise (ex: FINAL-TEST-2026)"
-              value={formData.company_code}
-              onChange={handleChange}
-              maxLength="50"
+              type="email"
+              placeholder="example@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              style={styles.input}
             />
-          )}
+          </div>
 
-          {/* EMAIL ET PASSWORD (TOUS) */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <div style={styles.formGroup}>
+            <label>🔐 Mot de passe</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={styles.input}
+            />
+          </div>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Mot de passe"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
-          <button type="submit" className="btn-submit">
-            {isLogin ? '🔓 Se connecter' : '📝 S\'inscrire'}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              ...styles.submitBtn,
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? '⏳ Connexion en cours...' : '✅ Connexion'}
           </button>
         </form>
 
-        <p className="toggle-text">
-          {isLogin ? "Pas encore de compte? " : "Vous avez déjà un compte? "}
-          <span
-            onClick={() => setIsLogin(!isLogin)}
-            style={{ cursor: 'pointer', color: '#007BFF', fontWeight: 'bold' }}
-          >
-            {isLogin ? 'S\'inscrire' : 'Se connecter'}
-          </span>
-        </p>
+        <div style={styles.footer}>
+          <p>Besoin d'aide ? <a href="mailto:support@deliverhub-africa.com" style={styles.link}>support@deliverhub-africa.com</a></p>
+        </div>
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif'
+  },
+  loginBox: {
+    backgroundColor: 'white',
+    borderRadius: '10px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+    padding: '40px',
+    maxWidth: '400px',
+    width: '100%'
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '30px'
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px'
+  },
+  toggleButtons: {
+    display: 'flex',
+    gap: '10px',
+    marginBottom: '20px'
+  },
+  toggleBtn: {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    transition: 'all 0.3s'
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+  },
+  input: {
+    padding: '12px',
+    border: '1px solid #ddd',
+    borderRadius: '5px',
+    fontSize: '14px',
+    fontFamily: 'Arial, sans-serif'
+  },
+  submitBtn: {
+    padding: '12px',
+    backgroundColor: '#3498db',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    marginTop: '10px'
+  },
+  footer: {
+    textAlign: 'center',
+    marginTop: '20px',
+    fontSize: '14px',
+    color: '#666'
+  },
+  link: {
+    color: '#3498db',
+    textDecoration: 'none'
+  }
+};
