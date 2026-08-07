@@ -129,13 +129,120 @@ function App() {
     if (!livreurId) return 0;
     return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
   };
+// ====================================
+// FONCTIONS POUR LES LIMITES TRIAL
+// ====================================
+
+const isTrialActive = () => {
+  const saved = localStorage.getItem('currentUser');
+  if (!saved) return false;
+  
+  const user = JSON.parse(saved);
+  if (!user.trialEnd) return false;
+  
+  const now = new Date();
+  const trialEnd = new Date(user.trialEnd);
+  return now <= trialEnd;
+};
+
+const getPlanStatus = () => {
+  const saved = localStorage.getItem('currentUser');
+  if (!saved) return 'expired';
+  
+  const user = JSON.parse(saved);
+  if (isTrialActive()) {
+    return 'trial';
+  }
+  if (user.plan && user.plan !== 'startup') {
+    return 'paid';
+  }
+  return 'expired';
+};
+
+const getTrialDaysLeft = () => {
+  const saved = localStorage.getItem('currentUser');
+  if (!saved) return 0;
+  
+  const user = JSON.parse(saved);
+  if (!user.trialEnd) return 0;
+  
+  const now = new Date();
+  const trialEnd = new Date(user.trialEnd);
+  const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
+  
+  return daysLeft > 0 ? daysLeft : 0;
+};
+
+const getTrialLimits = () => {
+  const status = getPlanStatus();
+  
+  if (status === 'trial') {
+    return {
+      maxColis: 10,
+      maxLivreurs: 2,
+      maxCar: '(Trial: 10 max)'
+    };
+  }
+  
+  if (status === 'paid') {
+    return {
+      maxColis: 1000,
+      maxLivreurs: 20,
+      maxCar: '(Pro)'
+    };
+  }
+  
+  return {
+    maxColis: 0,
+    maxLivreurs: 0,
+    maxCar: '(Expiré)'
+  };
+};
+
+const canAddParcel = () => {
+  const limits = getTrialLimits();
+  return parcels.length < limits.maxColis;
+};
+
+const canAddLivreur = () => {
+  const limits = getTrialLimits();
+  return livreurs.length < limits.maxLivreurs;
+};
+
+const getColisRemaining = () => {
+  const limits = getTrialLimits();
+  return limits.maxColis - parcels.length;
+};
+
+const getLivreursRemaining = () => {
+  const limits = getTrialLimits();
+  return limits.maxLivreurs - livreurs.length;
+};
 
   const handleAddParcel = async (e) => {
-    e.preventDefault();
-    if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
-      alert('❌ Veuillez remplir tous les champs');
-      return;
-    }
+  e.preventDefault();
+  
+  // VÉRIFIER LE PLAN D'ABORD
+  const status = getPlanStatus();
+  
+  if (status === 'expired') {
+    alert('❌ Votre trial gratuit a expiré.\nChoisissez un plan pour continuer.');
+    window.location.href = '/#/pricing';
+    return;
+  }
+  
+  // VÉRIFIER LA LIMITE DE COLIS
+  if (!canAddParcel()) {
+    const limits = getTrialLimits();
+    alert(`❌ Limite atteinte : ${limits.maxColis} colis max pour ${status === 'trial' ? 'le trial' : 'votre plan'}`);
+    window.location.href = '/#/pricing';
+    return;
+  }
+  
+  if (!parcelForm.de || !parcelForm.a || !parcelForm.prix) {
+    alert('❌ Veuillez remplir tous les champs');
+    return;
+  }
     try {
       const saved = localStorage.getItem('currentUser');
       const token = saved ? JSON.parse(saved).token : '';
@@ -346,6 +453,69 @@ function App() {
             {activeTab === 'dashboard' && (
               <div className="tab-content">
                 <h2>Tableau de bord</h2>
+{getPlanStatus() === 'expired' && (
+      <div style={{
+        backgroundColor: '#dc3545',
+        color: 'white',
+        padding: '20px',
+        borderRadius: '5px',
+        marginBottom: '20px',
+        textAlign: 'center'
+      }}>
+        <h3>❌ Votre trial gratuit a expiré !</h3>
+        <p>Choisissez un plan pour continuer à utiliser la plateforme.</p>
+        <button 
+          onClick={() => window.location.href = '/#/pricing'}
+          style={{
+            backgroundColor: '#ffc107',
+            color: 'black',
+            padding: '10px 30px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginTop: '10px'
+          }}
+        >
+          💳 Voir les plans
+        </button>
+      </div>
+    )}
+
+    {getPlanStatus() === 'trial' && (
+      <div style={{
+        backgroundColor: '#ffc107',
+        color: 'black',
+        padding: '15px',
+        borderRadius: '5px',
+        marginBottom: '20px'
+      }}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+          <div>
+            <strong>⏰ Trial gratuit actif : {getTrialDaysLeft()} jours restants</strong>
+            <p style={{marginTop: '10px', fontSize: '14px'}}>
+              📦 Colis : {parcels.length}/{getTrialLimits().maxColis} | 👥 Livreurs : {livreurs.length}/{getTrialLimits().maxLivreurs}
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.href = '/#/pricing'}
+            style={{
+              backgroundColor: '#dc3545',
+              color: 'white',
+              padding: '10px 20px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            💳 Upgrade
+          </button>
+        </div>
+      </div>
+    )}
                 <div className="stats-grid">
                   <div className="stat-card">
                     <h3>Total Colis</h3>
@@ -406,9 +576,17 @@ function App() {
               <div className="tab-content">
                 <div className="section-header">
                   <h2>Gestion des Colis</h2>
-                  <button className="btn-add" onClick={() => setShowParcelForm(!showParcelForm)}>
-                    {showParcelForm ? '✕ Fermer' : '+ Ajouter un colis'}
-                  </button>
+                 <button 
+  className="btn-add" 
+  onClick={() => setShowParcelForm(!showParcelForm)}
+  disabled={getPlanStatus() === 'expired' || !canAddParcel()}
+  style={{
+    opacity: (!canAddParcel() || getPlanStatus() === 'expired') ? 0.5 : 1,
+    cursor: (!canAddParcel() || getPlanStatus() === 'expired') ? 'not-allowed' : 'pointer'
+  }}
+>
+  {getPlanStatus() === 'expired' ? '🔒 Trial expiré' : !canAddParcel() ? `📦 Limite atteinte (${parcels.length}/${getTrialLimits().maxColis})` : '+ Ajouter un colis'}
+</button>
                 </div>
 
                 {showParcelForm && (
