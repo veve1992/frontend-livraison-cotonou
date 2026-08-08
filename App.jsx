@@ -69,6 +69,66 @@ function App() {
     }
   }, [currentPage, API_URL, entreprise]);
 
+  // ====================================
+  // ÉTAPE 4 : TOUTES LES FONCTIONS
+  // ====================================
+  
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      const saved = localStorage.getItem('currentUser');
+      const token = saved ? JSON.parse(saved).token : '';
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const [parcelRes, livreurRes] = await Promise.all([
+        fetch(`${API_URL}/parcels?page=${currentPage}&enterprise_id=${entreprise.id}`, { headers }),
+        fetch(`${API_URL}/livreurs?enterprise_id=${entreprise.id}`, { headers })
+      ]);
+      
+      if (parcelRes.ok) {
+        const data = await parcelRes.json();
+        setParcels(data.data || []);
+        setTotalPages(data.pages || 1);
+      }
+      if (livreurRes.ok) {
+        const data = await livreurRes.json();
+        setLivreurs(Array.isArray(data) ? data : data.livreurs || []);
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getLivreurNom = (livreurId) => {
+    if (!livreurId) return '—';
+    const id = parseInt(livreurId);
+    const livreur = livreurs.find(l => l.id === id);
+    return livreur ? livreur.nom : `Livreur #${id}`;
+  };
+
+  const getRevenuLivreur = (livreurId) => {
+    if (!livreurId) return 0;
+    return parcels
+      .filter(p => parseInt(p.livreur) === parseInt(livreurId) && p.status === 'Livré')
+      .reduce((sum, p) => sum + parseInt(p.prix), 0);
+  };
+
+  const getColisLivresLivreur = (livreurId) => {
+    if (!livreurId) return 0;
+    return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && p.status === 'Livré').length;
+  };
+
+  const getColisEnInstanceLivreur = (livreurId) => {
+    if (!livreurId) return 0;
+    return parcels.filter(p => parseInt(p.livreur) === parseInt(livreurId) && (p.status === 'Pris' || p.status === 'En route')).length;
+  };
 // ====================================
 // FONCTIONS POUR LES LIMITES TRIAL
 // ====================================
@@ -76,46 +136,81 @@ function App() {
 const isTrialActive = () => {
   const saved = localStorage.getItem('currentUser');
   if (!saved) return false;
-
-  const user = JSON.parse(saved);
-  if (!user.trialEnd) return false;
-
-  const now = new Date();
-  const trialEnd = new Date(user.trialEnd);
-  return now <= trialEnd;
+  
+  try {
+    const user = JSON.parse(saved);
+    
+    // Check plan_expiry au bon niveau
+    if (user.entreprise && user.entreprise.plan_expiry) {
+      const now = new Date();
+      const expiry = new Date(user.entreprise.plan_expiry);
+      return now <= expiry && user.entreprise.plan === 'startup';
+    }
+    
+    return false;
+  } catch (error) {
+    return false;
+  }
 };
-
 const getPlanStatus = () => {
   const saved = localStorage.getItem('currentUser');
   if (!saved) return 'expired';
-
-  const user = JSON.parse(saved);
-  if (isTrialActive()) {
-    return 'trial';
+  
+  try {
+    const user = JSON.parse(saved);
+    
+    // Vérifier plan_expiry si existe
+    if (user.entreprise && user.entreprise.plan_expiry) {
+      const now = new Date();
+      const expiry = new Date(user.entreprise.plan_expiry);
+      
+      console.log('🔍 Checking plan expiry:', {
+        now: now.toISOString(),
+        expiry: expiry.toISOString(),
+        isExpired: now > expiry
+      });
+      
+      if (now > expiry) {
+        return 'expired';
+      }
+      
+      if (user.entreprise.plan === 'startup') {
+        return 'trial';
+      }
+      
+      return 'paid';
+    }
+    
+    return 'expired';
+  } catch (error) {
+    console.error('Erreur getPlanStatus:', error);
+    return 'expired';
   }
-  if (user.plan && user.plan !== 'startup') {
-    return 'paid';
-  }
-  return 'expired';
 };
-
 const getTrialDaysLeft = () => {
   const saved = localStorage.getItem('currentUser');
   if (!saved) return 0;
-
-  const user = JSON.parse(saved);
-  if (!user.trialEnd) return 0;
-
-  const now = new Date();
-  const trialEnd = new Date(user.trialEnd);
-  const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
-
-  return daysLeft > 0 ? daysLeft : 0;
+  
+  try {
+    const user = JSON.parse(saved);
+    
+    // Check plan_expiry au bon niveau
+    if (user.entreprise && user.entreprise.plan_expiry) {
+      const now = new Date();
+      const expiry = new Date(user.entreprise.plan_expiry);
+      const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+      
+      return daysLeft > 0 ? daysLeft : 0;
+    }
+    
+    return 0;
+  } catch (error) {
+    return 0;
+  }
 };
-
 const getTrialLimits = () => {
   const status = getPlanStatus();
-
+  
   if (status === 'trial') {
     return {
       maxColis: 10,
@@ -123,7 +218,7 @@ const getTrialLimits = () => {
       maxCar: '(Trial: 10 max)'
     };
   }
-
+  
   if (status === 'paid') {
     return {
       maxColis: 1000,
@@ -131,7 +226,7 @@ const getTrialLimits = () => {
       maxCar: '(Pro)'
     };
   }
-
+  
   return {
     maxColis: 0,
     maxLivreurs: 0,
@@ -148,6 +243,7 @@ const canAddLivreur = () => {
   const limits = getTrialLimits();
   return livreurs.length < limits.maxLivreurs;
 };
+
 const getColisRemaining = () => {
   const limits = getTrialLimits();
   return limits.maxColis - parcels.length;
@@ -228,7 +324,7 @@ const getLivreursRemaining = () => {
     }
   };
 
-// ====================================
+  // ====================================
   // ÉTAPE 5 : CONDITIONS DE RETURN (DANS LE BON ORDRE)
   // ====================================
 
@@ -610,7 +706,7 @@ const getLivreursRemaining = () => {
                     </div>
                     <div className="form-group">
                       <label>Photo du colis</label>
-<input
+                      <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
@@ -689,9 +785,6 @@ const getLivreursRemaining = () => {
                           disabled={currentPage === totalPages}
                           style={{padding: '10px 20px', marginLeft: '10px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
                         >
-                          Next
-                        </button>
-                      </div>
                           Next
                         </button>
                       </div>
@@ -888,4 +981,4 @@ const getLivreursRemaining = () => {
   );
 }
 
-export default A
+export default App;
