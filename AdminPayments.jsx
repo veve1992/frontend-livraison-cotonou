@@ -12,7 +12,7 @@ export default function AdminPayments() {
     e.preventDefault();
     
     // Récupérer le mot de passe depuis localStorage (ou prompt)
-    const adminPassword = '[TON MOT DE PASSE ADMIN]'; // À remplacer
+    const adminPassword = 'MySecurePass2024!@#'; //
     
     if (password === adminPassword) {
       setIsAuthenticated(true);
@@ -38,7 +38,7 @@ export default function AdminPayments() {
 };
   const handleApproveDemand = async (reference) => {
     try {
-      const adminPassword = '[TON MOT DE PASSE ADMIN]';
+      const adminPassword = 'MySecurePass2024!@#'; //
       
       const response = await fetch(`${API_URL}/api/admin/approve-payment`, {
         method: 'POST',
