@@ -1,3 +1,4 @@
+import AdminPayments from './AdminPayments';
 import ComingSoon from './ComingSoon';
 import PricingPage from './PricingPage';
 import React, { useState, useEffect } from 'react';
@@ -337,7 +338,10 @@ const getLivreursRemaining = () => {
     const colis_id = suiviMatch[2];
     return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
   }
-
+// Hash /admin
+if (hash === '/admin') {
+  return <AdminPayments />;
+}
   // Hash /login
   if (hash === '/login') {
     return <LoginPage onLoginSuccess={(user, type) => {
