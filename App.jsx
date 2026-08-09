@@ -1,3 +1,4 @@
+import AdminEnterprises from './AdminEnterprises';
 import AdminPayments from './AdminPayments';
 import ComingSoon from './ComingSoon';
 import PricingPage from './PricingPage';
@@ -341,6 +342,9 @@ const getLivreursRemaining = () => {
 // Hash /admin
 if (hash === '/admin') {
   return <AdminPayments />;
+}
+if (hash === '/admin-enterprises') {
+  return <AdminEnterprises />;
 }
   // Hash /login
   if (hash === '/login') {

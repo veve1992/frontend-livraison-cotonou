@@ -25,7 +25,7 @@ export default function PricingPage() {
     {
       id: 'pro',
       name: 'Pro',
-      price: 29,
+      price: 49,
       duration: 'par mois',
       features: [
         '✅ 1000 colis/mois',
