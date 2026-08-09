@@ -95,15 +95,16 @@ export default function PricingPage() {
           enterprise_id: currentUser.entreprise?.id
         })
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.payment_link) {
-        // Redirection vers FedaPay
-        window.location.href = data.payment_link;
-      } else {
-        alert('❌ Erreur: ' + (data.error || 'Impossible de créer le paiement'));
-      }
+const data = await response.json();
+if (response.ok && data.success) {
+  // Afficher succès
+  alert(`✅ Demande de paiement envoyée !\n\nRéférence: ${data.reference}\nMontant: ${data.amount} XOF\n\nL'admin va valider votre paiement.`);
+  // Redirection vers dashboard
+  window.location.href = '/#/dashboard';
+} else {
+  alert('❌ Erreur: ' + (data.error || 'Impossible de créer le paiement'));
+}
+     
     } catch (error) {
       alert('❌ Erreur de connexion');
       console.error(error);
