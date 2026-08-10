@@ -495,6 +495,7 @@ if (hash === '/admin-enterprises') {
           )}
         </div>
       </header>
+<ExpiredBanner />
 
       {/* Navigation */}
       <nav className="nav">
