@@ -55,6 +55,43 @@ function App() {
     }
   }, []);
 
+// UseEffect 2 : POLLING - Vérifier status entreprise toutes les 30s
+useEffect(() => {
+  const saved = localStorage.getItem('currentUser');
+  if (!saved) return;
+
+  try {
+    const userData = JSON.parse(saved);
+    
+    // Polling toutes les 30 secondes
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/enterprise/status`, {
+          headers: {
+            'Authorization': `Bearer ${userData.token}`
+          }
+        });
+        
+        const data = await response.json();
+
+        if (data.isExpired) {
+          alert('🔴 Votre plan a expiré. Reconnexion requise.');
+          localStorage.clear();
+          setUserType(null);
+          setEntreprise(null);
+          window.location.href = '/#/login';
+        }
+      } catch (error) {
+        console.error('Status check error:', error);
+      }
+    }, 30000); // Toutes les 30 secondes
+
+    return () => clearInterval(interval);
+  } catch (error) {
+    console.error('Error in status polling:', error);
+  }
+}, [API_URL]);
+
   // UseEffect 2 : Écouter les changements de hash
   useEffect(() => {
     const handleHashChange = () => {
