@@ -64,47 +64,42 @@ useEffect(() => {
   try {
     const userData = JSON.parse(saved);
     
-    // Polling toutes les 30 secondes
-       const interval = setInterval(async () => {
-  if (!user || !user.token) {
-    clearInterval(interval);
-    return;
-  }
- // Polling seulement pour les gestionnaires (ils ont entreprise_id)
-  if (user.type !== 'gestionnaire' || !user.entreprise) {
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_URL}/api/enterprise/status`, {
-      headers: {
-        'Authorization': `Bearer ${user.token}`
-      }
-    });     
+    // ← AJOUTE CETTE VÉRIFICATION (AVEC userData, PAS user)
+    if (userData.type !== 'gestionnaire' || !userData.entreprise) {
+      return;
+    }
+    // ← FIN DE LA VÉRIFICATION
+    
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/enterprise/status`, {
+          headers: {
+            'Authorization': `Bearer ${userData.token}`
+          }
+        });
+        
         const data = await response.json();
 
-       if (data.isExpired) {
-  setIsExpired(true);
-  // Redirection après 10 secondes
-  setTimeout(() => {
-    alert('🔴 Votre plan a expiré. Reconnexion requise.');
-    localStorage.clear();
-    setUserType(null);
-    setEntreprise(null);
-    window.location.href = '/#/login';
-  }, 10000);
-}
+        if (data.isExpired) {
+          setIsExpired(true);
+          setTimeout(() => {
+            alert('🔴 Votre plan a expiré. Reconnexion requise.');
+            localStorage.clear();
+            setUserType(null);
+            setEntreprise(null);
+            window.location.href = '/#/login';
+          }, 10000);
+        }
       } catch (error) {
         console.error('Status check error:', error);
       }
-    }, 30000); // Toutes les 30 secondes
+    }, 30000);
 
     return () => clearInterval(interval);
   } catch (error) {
     console.error('Error in status polling:', error);
   }
 }, [API_URL]);
-
   // UseEffect 2 : Écouter les changements de hash
   useEffect(() => {
     const handleHashChange = () => {
