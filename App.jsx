@@ -70,6 +70,10 @@ useEffect(() => {
     clearInterval(interval);
     return;
   }
+ // Polling seulement pour les gestionnaires (ils ont entreprise_id)
+  if (user.type !== 'gestionnaire' || !user.entreprise) {
+    return;
+  }
   
   try {
     const response = await fetch(`${API_URL}/api/enterprise/status`, {
