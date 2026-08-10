@@ -11,7 +11,7 @@ export default function AdminEnterprises() {
   const handleLogin = (e) => {
     e.preventDefault();
     
-    const adminPassword = '[TON MOT DE PASSE ADMIN]'; // À remplacer
+    const adminPassword = 'MyCompany123!@#$2024Admin'; //
     
     if (password === adminPassword) {
       setIsAuthenticated(true);
@@ -41,7 +41,7 @@ export default function AdminEnterprises() {
     if (!confirm) return;
 
     try {
-      const adminPassword = '[TON MOT DE PASSE ADMIN]';
+      const adminPassword = 'MyCompany123!@#$2024Admin';
       
       const response = await fetch(`${API_URL}/api/admin/enterprise/${enterpriseId}/status`, {
         method: 'PUT',
@@ -73,7 +73,7 @@ export default function AdminEnterprises() {
     if (!confirm) return;
 
     try {
-      const adminPassword = '[TON MOT DE PASSE ADMIN]';
+      const adminPassword = 'MyCompany123!@#$2024Admin';
       
       const response = await fetch(`${API_URL}/api/admin/enterprise/${enterpriseId}/status`, {
         method: 'PUT',
