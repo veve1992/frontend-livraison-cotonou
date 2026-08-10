@@ -29,6 +29,7 @@ function App() {
   const [trackingId, setTrackingId] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedParcel, setSelectedParcel] = useState(null);
+  const [isExpired, setIsExpired] = useState(false);
   const [parcelForm, setParcelForm] = useState({
     de: '', a: '', prix: '', numero_receptionnaire: '',
     nom_receptionnaire: '', prenom_receptionnaire: '',
@@ -74,13 +75,17 @@ useEffect(() => {
         
         const data = await response.json();
 
-        if (data.isExpired) {
-          alert('🔴 Votre plan a expiré. Reconnexion requise.');
-          localStorage.clear();
-          setUserType(null);
-          setEntreprise(null);
-          window.location.href = '/#/login';
-        }
+       if (data.isExpired) {
+  setIsExpired(true);
+  // Redirection après 10 secondes
+  setTimeout(() => {
+    alert('🔴 Votre plan a expiré. Reconnexion requise.');
+    localStorage.clear();
+    setUserType(null);
+    setEntreprise(null);
+    window.location.href = '/#/login';
+  }, 10000);
+}
       } catch (error) {
         console.error('Status check error:', error);
       }
@@ -108,6 +113,32 @@ useEffect(() => {
     }
   }, [currentPage, API_URL, entreprise]);
 
+// Barre d'expiration
+const ExpiredBanner = () => {
+  if (!isExpired) return null;
+
+  return (
+    <div style={{
+      width: '100%',
+      backgroundColor: '#dc3545',
+      color: 'white',
+      padding: '15px',
+      textAlign: 'center',
+      fontSize: '16px',
+      fontWeight: 'bold',
+      marginBottom: '20px',
+      borderRadius: '5px',
+      boxShadow: '0 2px 10px rgba(220, 53, 69, 0.3)'
+    }}>
+      🔴 VOTRE PLAN A EXPIRÉ
+      <br />
+      <span style={{ fontSize: '12px', marginTop: '5px', display: 'block' }}>
+        Vous serez redirigé dans 10 secondes...
+      </span>
+    </div>
+  );
+};
+ 
   // ====================================
   // ÉTAPE 4 : TOUTES LES FONCTIONS
   // ====================================
