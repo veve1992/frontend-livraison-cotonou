@@ -65,14 +65,18 @@ useEffect(() => {
     const userData = JSON.parse(saved);
     
     // Polling toutes les 30 secondes
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/enterprise/status`, {
-          headers: {
-            'Authorization': `Bearer ${userData.token}`
-          }
-        });
-        
+       const interval = setInterval(async () => {
+  if (!user || !user.token) {
+    clearInterval(interval);
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/api/enterprise/status`, {
+      headers: {
+        'Authorization': `Bearer ${user.token}`
+      }
+    });     
         const data = await response.json();
 
        if (data.isExpired) {
