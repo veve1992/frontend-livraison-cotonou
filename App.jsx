@@ -192,13 +192,7 @@ const getPlanStatus = () => {
     if (user.entreprise && user.entreprise.plan_expiry) {
       const now = new Date();
       const expiry = new Date(user.entreprise.plan_expiry);
-      
-      console.log('🔍 Checking plan expiry:', {
-        now: now.toISOString(),
-        expiry: expiry.toISOString(),
-        isExpired: now > expiry
-      });
-      
+            
       if (now > expiry) {
         return 'expired';
       }
