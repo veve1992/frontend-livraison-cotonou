@@ -33,16 +33,32 @@ const handlePickup = async () => {
       'Authorization': `Bearer ${token}`
     };
     
-    const response = await fetch(`${API_URL}/parcels/${parcel.id}`, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify({
-        status: 'Pris',
-        livreur: parseInt(selectedLivreur),
-        enterprise_id: parcel.enterprise_id
-      })
-    });
-    
+    // D'abord assigner le livreur
+const livreurResponse = await fetch(`${API_URL}/parcels/${parcel.id}/livreur`, {
+  method: 'PUT',
+  headers: headers,
+  body: JSON.stringify({
+    livreur: parseInt(selectedLivreur)
+  })
+});
+
+if (!livreurResponse.ok) {
+  const error = await livreurResponse.json();
+  setError(`❌ Erreur: ${error.error || 'Impossible d\'assigner'}`);
+  setLoading(false);
+  return;
+}
+
+// Puis changer le statut
+const statusResponse = await fetch(`${API_URL}/parcels/${parcel.id}/status`, {
+  method: 'PUT',
+  headers: headers,
+  body: JSON.stringify({
+    status: 'Pris'
+  })
+});
+
+const response = statusResponse;    
     if (response.ok) {
       alert('✅ Livreur assigné ! SMS envoyé');
       onRefresh();
