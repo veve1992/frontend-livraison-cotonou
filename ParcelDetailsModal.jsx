@@ -228,10 +228,17 @@ const response = statusResponse;
             type="checkbox" 
             onChange={(e) => {
               if (e.target.checked) {
-             fetch(`${API_URL}/parcels/${parcel.id}?enterprise_id=${parcel.enterprise_id}`, {
+            const saved = localStorage.getItem('currentUser');
+const token = saved ? JSON.parse(saved).token : '';
+
+fetch(`${API_URL}/parcels/${parcel.id}/status`, {
   method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ status: 'Livré', enterprise_id: parcel.enterprise_id })
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({ status: 'Livré' })
+})
 }).then(() => {
                   alert('✅ Colis confirmé comme livré !');
                   onRefresh();
