@@ -227,25 +227,24 @@ const response = statusResponse;
           <input 
             type="checkbox" 
             onChange={(e) => {
-              if (e.target.checked) {
-            const saved = localStorage.getItem('currentUser');
-const token = saved ? JSON.parse(saved).token : '';
+  if (e.target.checked) {
+    const saved = localStorage.getItem('currentUser');
+    const token = saved ? JSON.parse(saved).token : '';
 
-fetch(`${API_URL}/parcels/${parcel.id}/status`, {
-  method: 'PUT',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  },
-  body: JSON.stringify({ status: 'Livré' })
-})
-}).then(() => {
-                  alert('✅ Colis confirmé comme livré !');
-                  onRefresh();
-                  onClose();
-                }).catch(err => alert('❌ Erreur: ' + err.message));
-              }
-            }}
+    fetch(`${API_URL}/parcels/${parcel.id}/status`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ status: 'Livré' })
+    }).then(() => {
+      alert('✅ Colis confirmé comme livré !');
+      onRefresh();
+      onClose();
+    }).catch(err => alert('❌ Erreur: ' + err.message));
+  }
+}}
           />
           {' '}Je confirme la réception du colis
         </label>
