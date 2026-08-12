@@ -72,6 +72,50 @@ function App() {
     }
   }, [currentPage, API_URL, entreprise]);
 
+// useEffect : POLLING - Vérifier status entreprise toutes les 30s
+useEffect(() => {
+  const saved = localStorage.getItem('currentUser');
+  if (!saved) return;
+
+  try {
+    const userData = JSON.parse(saved);
+    
+    // Polling seulement pour les gestionnaires
+    if (userData.type !== 'gestionnaire' || !userData.entreprise) {
+      return;
+    }
+    
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/enterprise/status`, {
+          headers: {
+            'Authorization': `Bearer ${userData.token}`
+          }
+        });
+        
+        const data = await response.json();
+
+        if (data.isExpired) {
+          setIsExpired(true);
+          setTimeout(() => {
+            alert('🔴 Votre plan a expiré. Reconnexion requise.');
+            localStorage.clear();
+            setUserType(null);
+            setEntreprise(null);
+            window.location.href = '/#/login';
+          }, 10000);
+        }
+      } catch (error) {
+        console.error('Status check error:', error);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  } catch (error) {
+    console.error('Error in status polling:', error);
+  }
+}, [API_URL]);
+
 // Barre d'expiration
 const ExpiredBanner = () => {
   if (!isExpired) return null;
