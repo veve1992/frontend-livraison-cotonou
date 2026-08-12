@@ -108,7 +108,7 @@ const LivreurDashboard = ({ livreur, entreprise }) => {
         'Authorization': `Bearer ${token}`
       };
 
-      const response = await fetch(`${API_URL}/parcels/${selectedColis.id}`, {
+    const response = await fetch(`${API_URL}/parcels/${selectedColis.id}/status`, { 
         method: 'PUT',
         headers: headers,
         body: JSON.stringify({
