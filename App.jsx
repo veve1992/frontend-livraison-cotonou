@@ -1,3 +1,4 @@
+import GuidePage from './GuidePage';
 import SupportPage from './SupportPage';
 import AdminEnterprises from './AdminEnterprises';
 import AdminPayments from './AdminPayments';
@@ -413,6 +414,8 @@ if (hash === '/admin-enterprises') {
   return <AdminEnterprises />;
 }
 if (hash === '/support') return <SupportPage />;
+if (hash === '/guide') return <GuidePage />;
+
   // Hash /login
   if (hash === '/login') {
     return <LoginPage onLoginSuccess={(user, type) => {
@@ -482,6 +485,24 @@ if (hash === '/support') return <SupportPage />;
   }}
 >
   📞 Support
+</button>
+
+<button 
+  onClick={() => window.location.href = '/#/guide'}
+  style={{
+    position: 'absolute',
+    top: '20px',
+    right: '220px',
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  }}
+>
+  📚 Guide
 </button>
 
           <button 
