@@ -1,3 +1,4 @@
+import SupportPage from './SupportPage';
 import AdminEnterprises from './AdminEnterprises';
 import AdminPayments from './AdminPayments';
 import ComingSoon from './ComingSoon';
@@ -411,6 +412,7 @@ if (hash === '/admin') {
 if (hash === '/admin-enterprises') {
   return <AdminEnterprises />;
 }
+if (hash === '/support') return <SupportPage />;
   // Hash /login
   if (hash === '/login') {
     return <LoginPage onLoginSuccess={(user, type) => {
@@ -464,6 +466,24 @@ if (hash === '/admin-enterprises') {
             <span className="logo-icon">🚚</span>
             <h1>DeliverHub</h1>
           </div>
+<button 
+  onClick={() => window.location.href = '/#/support'}
+  style={{
+    position: 'absolute',
+    top: '20px',
+    right: '120px',
+    backgroundColor: '#17a2b8',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  }}
+>
+  📞 Support
+</button>
+
           <button 
             onClick={() => {
               localStorage.clear();
