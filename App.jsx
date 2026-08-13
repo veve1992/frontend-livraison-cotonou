@@ -397,8 +397,15 @@ const getLivreursRemaining = () => {
   // ====================================
   // ÉTAPE 5 : CONDITIONS DE RETURN (DANS LE BON ORDRE)
   // ====================================
+const hash = window.location.hash.slice(1);
+
+// ========================================
+// 🎨 LANDING PAGE MARKETING (Page d'accueil)
+// ========================================
+if (!userType && (hash === '' || hash === '/')) {
+  return <LandingPageMarketing />;
+}
 // Vérifier le hash pour suivi public
-  const hash = window.location.hash.slice(1);
   const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
 
   if (suiviMatch) {
