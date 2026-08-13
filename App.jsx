@@ -1,3 +1,4 @@
+import LandingPageMarketing from './LandingPageMarketing';
 import GuidePage from './GuidePage';
 import SupportPage from './SupportPage';
 import AdminEnterprises from './AdminEnterprises';
@@ -9,7 +10,7 @@ import LivreurDashboard from './LivreurDashboard';
 import SignatureComponent from './SignatureComponent';
 import ParcelDetailsModal from './ParcelDetailsModal';
 import TrackingPublic from './TrackingPublic';
-import LandingPage from './LandingPage';
+import LandingPage from './LandingPage'; 
 import './App.css';
 import './styles-premium.css';
 import LoginPage from './LoginPage';
@@ -396,66 +397,114 @@ const getLivreursRemaining = () => {
   // ====================================
   // ÉTAPE 5 : CONDITIONS DE RETURN (DANS LE BON ORDRE)
   // ====================================
+// Déterminer la page à afficher
+const hash = window.location.hash.slice(1) || '';
 
-  // Vérifier le hash pour suivi public
-  const hash = window.location.hash.slice(1);
+// ========================================
+// SI PAS CONNECTÉ
+// ========================================
+if (!userType) {
+  
+  // ✅ TRACKING PUBLIC - Suivi par code/id (important à garder)
   const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
-
   if (suiviMatch) {
     const company_code = suiviMatch[1];
     const colis_id = suiviMatch[2];
     return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
   }
-// Hash /admin
-if (hash === '/admin') {
-  return <AdminPayments />;
-}
-if (hash === '/admin-enterprises') {
-  return <AdminEnterprises />;
-}
-if (hash === '/support') return <SupportPage />;
-if (hash === '/guide') return <GuidePage />;
-
-  // Hash /login
+  
+  // Landing Page Marketing (DÉFAUT - page d'accueil)
+  if (hash === '' || hash === '/') {
+    return <LandingPageMarketing />;
+  }
+  
+  // Tracking Page (suivi public simple)
+  if (hash === '/tracking') {
+    return <LandingPage />;
+  }
+  
+  // Login pages
+  if (hash === '/login-gestionnaire') {
+    return <LoginPage onLoginSuccess={(user, type) => {
+      setUserType(type);
+      setEntreprise(user);
+    }} />;
+  }
+  
+  if (hash === '/login-livreur') {
+    return <LoginPage onLoginSuccess={(user, type) => {
+      setUserType(type);
+      setEntreprise(user);
+    }} />;
+  }
+  
   if (hash === '/login') {
     return <LoginPage onLoginSuccess={(user, type) => {
       setUserType(type);
       setEntreprise(user);
     }} />;
   }
+  
+  // Inscription pages
+  if (hash === '/register-gestionnaire') return <RegisterGestionnaire />;
+  if (hash === '/register-livreur') return <RegisterLivreur />;
+  
+  // Pricing
+  if (hash === '/pricing') return <PricingPage />;
+  
+  // Support & Guide
+  if (hash === '/support') return <SupportPage />;
+  if (hash === '/guide') return <GuidePage />;
+  
+  // Par défaut : Landing Marketing
+  return <LandingPageMarketing />;
+}
 
-  // Hash /pricing
-  if (hash === '/pricing') {
-    return <PricingPage />;
+// ========================================
+// SI CONNECTÉ - GESTIONNAIRE
+// ========================================
+if (userType === 'gestionnaire') {
+  // Admin routes
+  if (hash === '/admin') return <AdminPayments />;
+  if (hash === '/admin-enterprises') return <AdminEnterprises />;
+  
+  // Support & Guide
+  if (hash === '/support') return <SupportPage />;
+  if (hash === '/guide') return <GuidePage />;
+  
+  // Dashboard défaut pour gestionnaire
+  if (hash === '/dashboard' || hash === '') {
+    return <App2 />;
   }
+  
+  // Sinon dashboard
+  return <App2 />;
+}
 
-  // Hash /dashboard
-  if (hash === '/dashboard') {
-    if (!entreprise) {
-      return <LoginPage onLoginSuccess={(user, type) => {
-        setUserType(type);
-        setEntreprise(user);
-      }} />;
-    }
-    if (userType === 'livreur') {
-      const saved = localStorage.getItem('currentUser');
-      const livreur = saved ? JSON.parse(saved).user : null;
-      return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
-    }
-    // Continue to render dashboard below
-  }
-
-  // Si pas d'entreprise = pas connecté = LandingPage
-  if (!entreprise) {
-    return <LandingPage />;
-  }
-
-  // Si livreur = LivreurDashboard
-  if (userType === 'livreur') {
+// ========================================
+// SI CONNECTÉ - LIVREUR
+// ========================================
+if (userType === 'livreur') {
+  // Support & Guide
+  if (hash === '/support') return <SupportPage />;
+  if (hash === '/guide') return <GuidePage />;
+  
+  // Dashboard défaut pour livreur
+  if (hash === '/dashboard' || hash === '') {
     const saved = localStorage.getItem('currentUser');
     const livreur = saved ? JSON.parse(saved).user : null;
     return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
   }
+  
+  // Sinon dashboard
+  const saved = localStorage.getItem('currentUser');
+  const livreur = saved ? JSON.parse(saved).user : null;
+  return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
+}
+
+// Par défaut
+return <LandingPageMarketing />;
+ 
 
   // ====================================
   // RENDER DASHBOARD GESTIONNAIRE (défaut)
