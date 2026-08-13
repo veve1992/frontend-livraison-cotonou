@@ -173,22 +173,21 @@ export default function LandingPageMarketing() {
         <div style={styles.heroButtons}>
           <button 
             style={{...styles.button, ...styles.buttonPrimary}}
-            onClick={() => window.location.href = '/#/register-gestionnaire'}
-          >
+           onClick={() => window.location.href = '/#/landing'}          >
             ➕ S'inscrire - Gestionnaire
           </button>
           
           <button 
             style={{...styles.button, ...styles.buttonSecondary}}
-            onClick={() => window.location.href = '/#/register-livreur'}
-          >
+            onClick={() => window.location.href = '/#/landing'}          >
+
             👨‍💼 S'inscrire - Livreur
           </button>
 
           <button 
             style={{...styles.button, ...styles.buttonSecondary}}
-            onClick={() => window.location.href = '/#/tracking'}
-          >
+          onClick={() => window.location.href = '/#/landing'}
+>  
             🔍 Suivre mon colis
           </button>
         </div>
@@ -301,8 +300,8 @@ export default function LandingPageMarketing() {
             </div>
             <button 
               style={{...styles.button, ...styles.buttonPrimary, width: '100%'}}
-              onClick={() => window.location.href = '/#/register-gestionnaire'}
-            >
+             onClick={() => window.location.href = '/#/landing'}
+>
               Commencer
             </button>
           </div>
@@ -318,8 +317,8 @@ export default function LandingPageMarketing() {
             </div>
             <button 
               style={{...styles.button, ...styles.buttonPrimary, width: '100%'}}
-              onClick={() => window.location.href = '/#/register-gestionnaire'}
-            >
+              onClick={() => window.location.href = '/#/landing'}
+>
               Choisir PRO
             </button>
           </div>
@@ -335,8 +334,8 @@ export default function LandingPageMarketing() {
             </div>
             <button 
               style={{...styles.button, ...styles.buttonPrimary, width: '100%'}}
-              onClick={() => window.location.href = '/#/register-gestionnaire'}
-            >
+               onClick={() => window.location.href = '/#/landing'}
+>
               Choisir ENTERPRISE
             </button>
           </div>
@@ -351,8 +350,8 @@ export default function LandingPageMarketing() {
         </p>
         <button 
           style={{...styles.button, ...styles.buttonPrimary}}
-          onClick={() => window.location.href = '/#/register-gestionnaire'}
-        >
+          onClick={() => window.location.href = '/#/landing'}
+>
           ➕ COMMENCER MAINTENANT
         </button>
       </div>

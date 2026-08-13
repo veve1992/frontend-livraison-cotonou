@@ -397,115 +397,81 @@ const getLivreursRemaining = () => {
   // ====================================
   // ÉTAPE 5 : CONDITIONS DE RETURN (DANS LE BON ORDRE)
   // ====================================
-// Déterminer la page à afficher
 const hash = window.location.hash.slice(1) || '';
 
 // ========================================
-// SI PAS CONNECTÉ
+// 🔐 ADMIN ROUTES - PRIORITÉ ABSOLUE
+// (Pas de redirection, accès direct)
 // ========================================
-if (!userType) {
-  
-  // ✅ TRACKING PUBLIC - Suivi par code/id (important à garder)
-  const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
-  if (suiviMatch) {
-    const company_code = suiviMatch[1];
-    const colis_id = suiviMatch[2];
-    return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
-  }
-  
-  // Landing Page Marketing (DÉFAUT - page d'accueil)
-  if (hash === '' || hash === '/') {
-    return <LandingPageMarketing />;
-  }
-  
-  // Tracking Page (suivi public simple)
-  if (hash === '/tracking') {
-    return <LandingPage />;
-  }
-  
-  // Login pages
-  if (hash === '/login-gestionnaire') {
-    return <LoginPage onLoginSuccess={(user, type) => {
-      setUserType(type);
-      setEntreprise(user);
-    }} />;
-  }
-  
-  if (hash === '/login-livreur') {
-    return <LoginPage onLoginSuccess={(user, type) => {
-      setUserType(type);
-      setEntreprise(user);
-    }} />;
-  }
-  
-  if (hash === '/login') {
-    return <LoginPage onLoginSuccess={(user, type) => {
-      setUserType(type);
-      setEntreprise(user);
-    }} />;
-  }
-  
-  // Inscription pages
-  if (hash === '/register-gestionnaire') return <RegisterGestionnaire />;
-  if (hash === '/register-livreur') return <RegisterLivreur />;
-  
-  // Pricing
-  if (hash === '/pricing') return <PricingPage />;
-  
-  // Support & Guide
-  if (hash === '/support') return <SupportPage />;
-  if (hash === '/guide') return <GuidePage />;
-  
-  // Par défaut : Landing Marketing
-  return <LandingPageMarketing />;
+if (hash === '/admin') {
+  return <AdminPayments />;
+}
+if (hash === '/admin-enterprises') {
+  return <AdminEnterprises />;
 }
 
 // ========================================
-// SI CONNECTÉ - GESTIONNAIRE
+// 📍 SUIVI PUBLIC
+// (Accès direct)
 // ========================================
-if (userType === 'gestionnaire') {
-  // Admin routes
-  if (hash === '/admin') return <AdminPayments />;
-  if (hash === '/admin-enterprises') return <AdminEnterprises />;
-  
-  // Support & Guide
-  if (hash === '/support') return <SupportPage />;
-  if (hash === '/guide') return <GuidePage />;
-  
-  // Dashboard défaut pour gestionnaire
-  if (hash === '/dashboard' || hash === '') {
-    return <App2 />;
-  }
-  
-  // Sinon dashboard
-  return <App2 />;
+const suiviMatch = hash.match(/^\/suivi\/([^\/]+)\/(\d+)$/);
+if (suiviMatch) {
+  const company_code = suiviMatch[1];
+  const colis_id = suiviMatch[2];
+  return <TrackingPublic company_code={company_code} colis_id={colis_id} />;
 }
 
 // ========================================
-// SI CONNECTÉ - LIVREUR
+// 📞 SUPPORT & GUIDE
+// (Accessibles de partout)
 // ========================================
-if (userType === 'livreur') {
-  // Support & Guide
-  if (hash === '/support') return <SupportPage />;
-  if (hash === '/guide') return <GuidePage />;
-  
-  // Dashboard défaut pour livreur
-  if (hash === '/dashboard' || hash === '') {
+if (hash === '/support') return <SupportPage />;
+if (hash === '/guide') return <GuidePage />;
+
+// ========================================
+// ✅ SI CONNECTÉ - AFFICHER DASHBOARD
+// ========================================
+if (userType && entreprise) {
+  // Livreur connecté
+  if (userType === 'livreur') {
     const saved = localStorage.getItem('currentUser');
     const livreur = saved ? JSON.parse(saved).user : null;
     return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
   }
-  
-  // Sinon dashboard
-  const saved = localStorage.getItem('currentUser');
-  const livreur = saved ? JSON.parse(saved).user : null;
-  return <LivreurDashboard livreur={livreur} entreprise={entreprise} />;
+  // Gestionnaire connecté
+  return <App2 />;
 }
 
-// Par défaut
-return <LandingPageMarketing />;
- 
+// ========================================
+// 🌐 SI PAS CONNECTÉ - PAGES PUBLIQUES
+// ========================================
 
+// 🎨 Landing Page Marketing (page d'accueil par défaut)
+if (hash === '' || hash === '/') {
+  return <LandingPageMarketing />;
+}
+
+// 📦 Landing Page (page centrale)
+// Suivi colis + Accès gestionnaire/livreur
+if (hash === '/landing' || hash === '/tracking') {
+  return <LandingPage />;
+}
+
+// 🔓 Login Pages
+if (hash === '/login') {
+  return <LoginPage onLoginSuccess={(user, type) => {
+    setUserType(type);
+    setEntreprise(user);
+  }} />;
+}
+
+// 💳 Pricing
+if (hash === '/pricing') {
+  return <PricingPage />;
+}
+
+// 🔴 Par défaut : Landing Marketing
+return <LandingPageMarketing />;
   // ====================================
   // RENDER DASHBOARD GESTIONNAIRE (défaut)
   // ====================================
