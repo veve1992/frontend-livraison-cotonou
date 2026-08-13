@@ -462,9 +462,12 @@ if (hash === '/login') {
   return <LoginPage onLoginSuccess={(user, type) => {
     setUserType(type);
     setEntreprise(user);
+    // ✅ REDIRIGER vers dashboard après connexion
+    setTimeout(() => {
+      window.location.href = '/#/dashboard';
+    }, 500);
   }} />;
 }
-
 // 💳 Pricing
 if (hash === '/pricing') {
   return <PricingPage />;
