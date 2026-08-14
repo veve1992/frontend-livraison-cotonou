@@ -51,14 +51,14 @@ function App() {
    useEffect(() => {
     // Charge le script Google Analytics
     const script = document.createElement('script');
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-549981807';
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-6X64CDC1TL';
     script.async = true;
     document.head.appendChild(script);
     
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-549981807');
+    gtag('config', 'G-6X64CDC1TL');
   }, []);
 
   // UseEffect 1 : Charger entreprise du localStorage
