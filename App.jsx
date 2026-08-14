@@ -48,7 +48,19 @@ function App() {
   // ====================================
   // ÉTAPE 3 : TOUS LES USEEFFECT
   // ====================================
-  
+   useEffect(() => {
+    // Charge le script Google Analytics
+    const script = document.createElement('script');
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-549981807';
+    script.async = true;
+    document.head.appendChild(script);
+    
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-549981807');
+  }, []);
+
   // UseEffect 1 : Charger entreprise du localStorage
   useEffect(() => {
     const saved = localStorage.getItem('currentUser');
