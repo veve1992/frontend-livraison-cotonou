@@ -48,20 +48,7 @@ function App() {
   // ====================================
   // ÉTAPE 3 : TOUS LES USEEFFECT
   // ====================================
-   useEffect(() => {
-    // Charge le script Google Analytics
-    const script = document.createElement('script');
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-6X64CDC1TL';
-    script.async = true;
-    document.head.appendChild(script);
-    
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-6X64CDC1TL');
-  }, []);
-
-  // UseEffect 1 : Charger entreprise du localStorage
+   // UseEffect 1 : Charger entreprise du localStorage
   useEffect(() => {
     const saved = localStorage.getItem('currentUser');
     if (saved) {
